@@ -1,4 +1,212 @@
 {
+ "2026-05-07": {
+  "fresh_companies": 16,
+  "fresh_dart": 0,
+  "fresh_news": 27,
+  "highlights": [
+   {
+    "cat": "실적",
+    "company": "심텍",
+    "link": "https://stock.mk.co.kr/news/view/1079369",
+    "title": "심텍 1분기 영업이익 137억원…흑자 전환"
+   },
+   {
+    "cat": "사업재편",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://www.thelec.net/news/articleView.html?idxno=10190",
+    "title": "Applied Materials to Acquire ASMPT's NEXX Business"
+   },
+   {
+    "cat": "사업재편",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://kr.investing.com/news/company-news/article-93CH-1924420",
+    "title": "어플라이드 머티어리얼즈, NEXX 첨단 패키징 사업부 인수"
+   }
+  ],
+  "total": 73
+ },
+ "2026-05-14": {
+  "fresh_companies": 26,
+  "fresh_dart": 0,
+  "fresh_news": 64,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://www.weeklypost.kr/news/articleView.html?idxno=11256",
+    "title": "TSMC·어플라이드 머티어리얼즈, 5조원대 EPIC 센터서 차세대 AI 반도체 공정 협력"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "글로벌스탠다드테크놀로지",
+    "link": "https://www.g-enews.com/article/Industry/2026/05/20260513135811679624debea800_1",
+    "title": "에쓰오일, GST와 데이터센터 액침냉각 솔루션 선보인다"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://edata.ekn.kr/article/view/ekn202605070005",
+    "title": "신성이엔지, 1분기 수주 203% 급증…“반도체·태양광 쌍끌이 기대”"
+   }
+  ],
+  "total": 73
+ },
+ "2026-05-21": {
+  "fresh_companies": 20,
+  "fresh_dart": 0,
+  "fresh_news": 34,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "https://www.newspim.com/news/view/20260519001129",
+    "title": "印 타타, ASML과 인도 최초 반도체 팹 공장 설립 계약...인도·네덜란드 기술 협력 강화"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "피엠티",
+    "link": "https://www.bloter.net/news/articleView.html?idxno=662982",
+    "title": "피엠티, 삼성 중국법인과 65억 규모 공급계약"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://www.hvacrj.co.kr/news/articleView.html?idxno=30957",
+    "title": "[HVAC KOREA 2026] 신성이엔지, AI 서버랙·냉각시스템 일체형 모듈 플랫폼 공개"
+   }
+  ],
+  "total": 73
+ },
+ "2026-05-28": {
+  "fresh_companies": 21,
+  "fresh_dart": 0,
+  "fresh_news": 44,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "예스티",
+    "link": "https://www.hankyung.com/article/202605269056L",
+    "title": "예스티 수주공시 - 반도체 제조장비(네오콘, 가압큐어) 82.8억원 (매출액대비 9.51 %)"
+   },
+   {
+    "cat": "투자·증설",
+    "company": "ASML",
+    "link": "https://www.donga.com/news/Economy/article/all/20260526/133996078/2",
+    "title": "화웨이 “ASML 장비 없이 1.4나노 생산”… 韓 맹추격"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "한양이엔지",
+    "link": "https://www.bloter.net/news/articleView.html?idxno=663533",
+    "title": "한양이엔지, 1214억 CDS 패키지 공급계약 체결"
+   }
+  ],
+  "total": 73
+ },
+ "2026-06-04": {
+  "fresh_companies": 22,
+  "fresh_dart": 0,
+  "fresh_news": 35,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "와이씨",
+    "link": "https://www.topstarnews.net/news/articleView.html?idxno=16077018",
+    "title": "와이씨, 반도체 검사장비 공급계약 930억→매출성장 기대"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "예스티",
+    "link": "https://m.blog.naver.com/dealsite/224301492109",
+    "title": "예스티 \"특허심판원, HPSP 고압어닐링장비 특허 최종무효 판정\""
+   },
+   {
+    "cat": "기술·제품",
+    "company": "심텍",
+    "link": "https://www.etnews.com/20260528000084",
+    "title": "“유리·구리 열팽창계수 차이 해소”…심텍, 반도체 패키징 학회 'ECTC'서 유리기판 연구 발표"
+   }
+  ],
+  "total": 73
+ },
+ "2026-06-11": {
+  "fresh_companies": 22,
+  "fresh_dart": 0,
+  "fresh_news": 43,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "디아이",
+    "link": "https://m.joseilbo.com/news/view.htm?newsid=569759",
+    "title": "디아이, 삼성전자에 725억 규모 반도체 검사장비 공급 [공시pick]"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "예스티",
+    "link": "https://marketin.edaily.co.kr/News/ReadE?newsId=03693286645478440",
+    "title": "예스티, 228억 규모 반도체 제조장비 공급계약 체결"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://ket.kr/news/article.html?no=38714",
+    "title": "나노 공정이 바꾼 클린룸…신성이엔지 수주단가 껑충"
+   }
+  ],
+  "total": 73
+ },
+ "2026-06-18": {
+  "fresh_companies": 19,
+  "fresh_dart": 0,
+  "fresh_news": 53,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "디아이",
+    "link": "https://dealsite.co.kr/articles/163686",
+    "title": "[핀셋+] [디아이] 반년새 3000억 수주…삼성·SK 반도체장비 공급 확대"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://v.daum.net/v/QzdDdAAiaV?f=p",
+    "title": "신성이엔지, 인도 스털링 앤 윌슨과 반도체·배터리 등 제조 시설용 클린룸 사업 협력"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "https://finance.yahoo.com/technology/ai/articles/asml-ceo-flags-terafab-opportunity-185944667.html",
+    "title": "ASML CEO Flags Terafab Opportunity as AI Demand Stays Enormous"
+   }
+  ],
+  "total": 73
+ },
+ "2026-06-25": {
+  "fresh_companies": 25,
+  "fresh_dart": 0,
+  "fresh_news": 52,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "티엘비",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=58560",
+    "title": "티엘비, 유리기판 시장 진출…유리 가공 장비사와 MOU"
+   },
+   {
+    "cat": "실적",
+    "company": "예스티",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=58518",
+    "title": "1d 나노 D램에 고압수소어닐링 적용 논의...예스티 실적 확대 기대"
+   },
+   {
+    "cat": "사업재편",
+    "company": "엠케이전자",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=58374",
+    "title": "엠케이전자, 동부엔텍 555억원에 매각"
+   }
+  ],
+  "total": 73
+ },
  "2026-07-02": {
   "fresh_companies": 20,
   "fresh_dart": 0,
