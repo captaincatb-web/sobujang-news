@@ -1,4 +1,5 @@
 /* 주간 뉴스 페이지 추가 서식 (기본 색·글꼴은 styles.css 의 KRDS 값을 따른다) */
+.page-head .lead{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
 .tab{min-height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
 .tab.on{background:var(--selected);border-color:var(--selected);color:#fff;font-weight:700}

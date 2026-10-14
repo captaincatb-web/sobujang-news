@@ -166,7 +166,7 @@ def build_index() -> None:
     main = f"""
     <section class="page-head" aria-labelledby="title">
       <h1 id="title">주간 뉴스</h1>
-      <p class="lead">반도체 소부장 협력사 73곳의 뉴스·공시를 매주 목요일 모아 보여 줍니다. 5월부터 주차별로 볼 수 있습니다.</p>
+      <p class="lead">소부장 협력사 73곳의 주간 뉴스·공시 (5월~, 매주 목요일 갱신)</p>
     </section>
     <div class="tabs" role="group" aria-label="월 선택"><button type="button" class="tab" data-m="all">전체</button>{tabs}</div>
     {"".join(cards)}"""
@@ -183,6 +183,7 @@ def build_index() -> None:
 
 
 NEWS_CSS = """/* 주간 뉴스 페이지 추가 서식 (기본 색·글꼴은 styles.css 의 KRDS 값을 따른다) */
+.page-head .lead{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
 .tab{min-height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
 .tab.on{background:var(--selected);border-color:var(--selected);color:#fff;font-weight:700}
