@@ -14,7 +14,7 @@ from src.config import ROOT_DIR
 SITE_DIR = ROOT_DIR / "site"
 NEWS_DIR = SITE_DIR / "news"
 META_PATH = ROOT_DIR / "data" / "site_weeks.json"
-SITE_START = date(2026, 7, 2)  # 첫 주차: 7월 첫 목요일
+SITE_START = date(2026, 5, 7)  # 첫 주차: 5월 첫 목요일
 REPO_URL = "https://github.com/captaincatb-web/sobujang-news"
 
 
@@ -80,7 +80,7 @@ def _layout(*, prefix: str, title: str, crumbs: str, main: str, script: str = ""
       <p class="f-logo"><span class="brand-mark" aria-hidden="true">소</span>소부장 주간 뉴스</p>
       <div class="f-info">
         <p><strong>매주 목요일 자동 갱신</strong> · 기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지이며, 저작권은 각 언론사에 있습니다.</p>
-        <p>2026년 7~9월은 구글뉴스 검색 기준으로 소급 수집해 공시·주가가 빠져 있습니다.</p>
+        <p>2026년 5~9월은 구글뉴스 검색 기준으로 소급 수집해 공시·주가가 빠져 있습니다.</p>
       </div>
       <div class="f-btm"><p class="f-copy">© 2026 소부장 주간 뉴스</p></div>
     </div>
@@ -167,7 +167,7 @@ def build_index() -> None:
     main = f"""
     <section class="page-head" aria-labelledby="title">
       <h1 id="title">주간 뉴스</h1>
-      <p class="lead">반도체 소부장 협력사 73곳의 뉴스·공시를 매주 목요일 모아 보여 줍니다. 7월부터 주차별로 볼 수 있습니다.</p>
+      <p class="lead">반도체 소부장 협력사 73곳의 뉴스·공시를 매주 목요일 모아 보여 줍니다. 5월부터 주차별로 볼 수 있습니다.</p>
     </section>
     <div class="tabs" role="group" aria-label="월 선택"><button type="button" class="tab" data-m="all">전체</button>{tabs}</div>
     {"".join(cards)}"""

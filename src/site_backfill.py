@@ -37,6 +37,8 @@ def main() -> None:
     if args.only:
         keys = [k for k in keys if k.isoformat() == args.only]
     for key in keys:
+        if not args.only and (site.NEWS_DIR / f"{key}.html").exists():
+            continue  # 이미 만든 주차는 건너뛴다 (--only 로 지정하면 다시 만든다)
         build_week(key)
 
 
