@@ -388,5 +388,31 @@
    }
   ],
   "total": 73
+ },
+ "2026-10-15": {
+  "fresh_companies": 27,
+  "fresh_dart": 16,
+  "fresh_news": 87,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "피엠티",
+    "link": "https://www.vegannews.co.kr/news/article.html?no=392090",
+    "title": "피엠티, 삼성전자에 72억9250만원 프로브카드 공급"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://economybloc.com/news/118946/",
+    "title": "어플라이드 머티어리얼즈, 50억달러 반도체 연구센터 공개…삼성·SK하이닉스 협력 예정"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "램리서치",
+    "link": "https://elec4.co.kr/contents/article_detail?article_idx=38486",
+    "title": "램리서치, 한국에서 생산한 반도체 제조용 챔버 15,000호기 출하해"
+   }
+  ],
+  "total": 73
  }
 }
