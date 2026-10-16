@@ -14,7 +14,7 @@ from src.config import ROOT_DIR
 SITE_DIR = ROOT_DIR / "site"
 NEWS_DIR = SITE_DIR / "news"
 META_PATH = ROOT_DIR / "data" / "site_weeks.json"
-SITE_START = date(2026, 5, 7)  # 첫 주차: 5월 첫 목요일
+SITE_START = date(2026, 1, 1)  # 첫 주차: 1월 첫 목요일
 REPO_URL = "https://github.com/captaincatb-web/sobujang-news"
 
 
@@ -166,7 +166,7 @@ def build_index() -> None:
     main = f"""
     <section class="page-head" aria-labelledby="title">
       <h1 id="title">주간 뉴스</h1>
-      <p class="lead">소부장 협력사 73곳의 주간 뉴스·공시 (5월~, 매주 목요일 갱신)</p>
+      <p class="lead">소부장 협력사 73곳의 주간 뉴스·공시 (1월~, 매주 목요일 갱신)</p>
     </section>
     <div class="tabs" role="group" aria-label="월 선택"><button type="button" class="tab" data-m="all">전체</button>{tabs}</div>
     {"".join(cards)}"""
