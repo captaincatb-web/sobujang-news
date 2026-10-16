@@ -1,4 +1,466 @@
 {
+ "2026-01-01": {
+  "fresh_companies": 13,
+  "fresh_dart": 0,
+  "fresh_news": 17,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "원익머트리얼즈",
+    "link": "https://m.news2day.co.kr/article/20251231500117",
+    "title": "“원익머트리얼즈, 중장기 북미 고객사향 공급 확대 기대”"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "에바라",
+    "link": "https://theguru.co.kr/news/article.html?no=96092",
+    "title": "GS건설, 액화수소 플랜트 사업 출사표…日 에바라와 협약 체결"
+   }
+  ],
+  "total": 73
+ },
+ "2026-01-08": {
+  "fresh_companies": 13,
+  "fresh_dart": 0,
+  "fresh_news": 18,
+  "highlights": [
+   {
+    "cat": "사업재편",
+    "company": "동진쎄미켐",
+    "link": "https://www.numbers.co.kr/news/articleView.html?idxno=20185",
+    "title": "동진쎄미켐 물적분할 새 회사 대표는 장남 '왜'"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "예스티",
+    "link": "https://www.bloter.net/news/articleView.html?idxno=650839",
+    "title": "예스티, 삼성전자에 76억 반도체 제조 장비 납품"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "램리서치",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=50640",
+    "title": "CMTX·월덱스, 램리서치 특허 1건 무효화"
+   }
+  ],
+  "total": 73
+ },
+ "2026-01-15": {
+  "fresh_companies": 14,
+  "fresh_dart": 0,
+  "fresh_news": 27,
+  "highlights": [
+   {
+    "cat": "기술·제품",
+    "company": "램리서치",
+    "link": "https://www.chosun.com/economy/tech_it/2026/01/14/CCQDVCFP5VBGRNIFHJS5GC7CXU/",
+    "title": "소부장 기업 괴롭히는 ‘특허 사냥꾼’ 램리서치"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "대덕전자",
+    "link": "https://plus.hankyung.com/apps/newsinside.view?aid=2026011377445&category=&sns=y",
+    "title": "대덕전자, 2분기에 증설 끝낸다…\"빅테크 공급 확대\""
+   },
+   {
+    "cat": "투자·증설",
+    "company": "신성이엔지",
+    "link": "https://www.sisajournal-e.com/news/articleView.html?idxno=418562",
+    "title": "[르포] 공장 가스 터지면 3초 만에 로봇 출동···신성이엔지 ‘무인 안전관제’"
+   }
+  ],
+  "total": 73
+ },
+ "2026-01-22": {
+  "fresh_companies": 18,
+  "fresh_dart": 0,
+  "fresh_news": 30,
+  "highlights": [
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://www.esnews.kr/news/articleView.html?idxno=1952",
+    "title": "반도체 수율의 적 ‘습기와 정전기’ 한 번에 잡았다···신성이엔지, 혁신 공정 솔루션 공개"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "코리아인스트루먼트",
+    "link": "https://www.newswire.co.kr/newsRead.php?no=1026775",
+    "title": "코리아인스트루먼트, 질병관리청 국립줄기세포재생센터 GMP 환경검증 용역 수주"
+   },
+   {
+    "cat": "사업재편",
+    "company": "에프에스티",
+    "link": "https://www.etnews.com/20260119000282",
+    "title": "에프에스티, 펠리클 사업용 부지 회사 흡수합병"
+   }
+  ],
+  "total": 73
+ },
+ "2026-01-29": {
+  "fresh_companies": 10,
+  "fresh_dart": 0,
+  "fresh_news": 21,
+  "highlights": [
+   {
+    "cat": "실적",
+    "company": "ASML",
+    "link": "https://v.daum.net/v/20260128171343527",
+    "title": "ASML, 작년 매출·이익 모두 사상 최대 기록"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "https://www.cnbc.com/2026/01/28/asml-q4-2025-earnings-report.html",
+    "title": "Chip giant ASML surges 7% as AI boom fuels record orders and upbeat 2026 guidance"
+   },
+   {
+    "cat": "투자·증설",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://www.hrkatha.com/news/applied-materials-to-support-growing-semiconductor-talent-with-new-bengaluru-facility/",
+    "title": "Applied Materials to support growing semiconductor talent with new Bengaluru facility"
+   }
+  ],
+  "total": 73
+ },
+ "2026-02-05": {
+  "fresh_companies": 14,
+  "fresh_dart": 0,
+  "fresh_news": 29,
+  "highlights": [
+   {
+    "cat": "기술·제품",
+    "company": "도쿄일렉트론",
+    "link": "https://www.newstap.co.kr/news/articleView.html?idxno=321447",
+    "title": "도쿄일렉트론, 세미콘 코리아 2026서 ‘모든 시작의 시작’ 전시 공개"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://biz.newdaily.co.kr/site/data/html/2026/02/02/2026020200085.html",
+    "title": "신성이엔지 '클린룸을 전시장으로' … 차세대 공기 제어 기술 공개"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "디아이",
+    "link": "https://www.finance-scope.com/article/view/scp202602020011",
+    "title": "디아이, SK하이닉스향 HBM4 웨이퍼 테스터 1000억 규모 수주 잭팟 주목-하나證"
+   }
+  ],
+  "total": 73
+ },
+ "2026-02-12": {
+  "fresh_companies": 17,
+  "fresh_dart": 0,
+  "fresh_news": 30,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=52100",
+    "title": "신성이엔지 \"2025년 4분기 영업익 1300% 증가...올해 수주 목표 7000억\""
+   },
+   {
+    "cat": "사업재편",
+    "company": "에어프로덕츠코리아",
+    "link": "https://www.bloter.net/news/articleView.html?idxno=654098",
+    "title": "'몸값 5조' 에어프로덕츠코리아, 반도체 호황에 매각설 '솔솔'"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "이비덴",
+    "link": "https://m.newsprime.co.kr/section_view.html?no=723996",
+    "title": "인스웨이브, 日 이비덴 그룹 계열사 '현장 안전 DX' 프로젝트 수주"
+   }
+  ],
+  "total": 73
+ },
+ "2026-02-19": {
+  "fresh_companies": 18,
+  "fresh_dart": 0,
+  "fresh_news": 45,
+  "highlights": [
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://dealsite.co.kr/articles/157019",
+    "title": "[세미콘 2026] 김동권 신성이엔지 CE연구실장 \"고객사와 '윈윈', 클린룸 체질 개선\""
+   },
+   {
+    "cat": "기술·제품",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://www.greened.kr/news/articleView.html?idxno=336976",
+    "title": "어플라이드머티어리얼즈, 2나노 이하 AI 칩 공정 혁신 공개… “GAA 한계 넘는다”"
+   },
+   {
+    "cat": "사업재편",
+    "company": "케이씨",
+    "link": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=631340",
+    "title": "KC그린홀딩스 자회사 케이씨글라스, M&A 최종 인수예정자 선정 허가 결정"
+   }
+  ],
+  "total": 73
+ },
+ "2026-02-26": {
+  "fresh_companies": 22,
+  "fresh_dart": 0,
+  "fresh_news": 40,
+  "highlights": [
+   {
+    "cat": "투자·증설",
+    "company": "ASML",
+    "link": "https://www.vietnam.vn/ko/asml-cong-bo-buoc-dot-pha-euv-mo-duong-tang-50-san-luong-chip-toan-cau",
+    "title": "ASML은 EUV 기술의 획기적인 발전을 발표하며 전 세계 칩 생산량을 50% 증가시킬 수 있는 길을 열었습니다."
+   },
+   {
+    "cat": "실적",
+    "company": "심텍",
+    "link": "https://www.creditnews.kr/news/articleView.html?idxno=2431",
+    "title": "심텍, 작년 흑자전환 성공…AI 업고 상반기 이익 4배 뛴다"
+   },
+   {
+    "cat": "투자·증설",
+    "company": "심텍",
+    "link": "https://youtu.be/EHdjHscPjiI?si=XKYrWoI2Mj8XyN8H&t=474",
+    "title": "[성하준의 투자 나침반] 심텍 / MBN 골드 성하준 매니저"
+   }
+  ],
+  "total": 73
+ },
+ "2026-03-05": {
+  "fresh_companies": 12,
+  "fresh_dart": 0,
+  "fresh_news": 18,
+  "highlights": [
+   {
+    "cat": "기술·제품",
+    "company": "글로벌스탠다드테크놀로지",
+    "link": "https://www.m-joongang.com/news/articleView.html?idxno=402216",
+    "title": "GST, ‘MWC 2026’서 액침냉각 솔루션 공개"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://www.kharn.kr/news/article.html?no=30172",
+    "title": "신성이엔지, 모듈형 DC 솔루션 'AIO' 개발"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "ASML",
+    "link": "https://biz.chosun.com/it-science/ict/2026/02/27/OG3BMYGJHBFBJE6IJYBIYIO2T4/",
+    "title": "“ASML, 차세대 EUV 장비 양산 준비 완료”… 파운드리 업계 1나노 경쟁 ‘채비’ - 조선비즈"
+   }
+  ],
+  "total": 73
+ },
+ "2026-03-12": {
+  "fresh_companies": 22,
+  "fresh_dart": 0,
+  "fresh_news": 37,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://www.munhwa.com/article/11573531",
+    "title": "신성이엔지 “반도체 클린룸 실적 우상향…바이오·태양광 수주 확대”"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "어플라이드머티어리얼즈",
+    "link": "https://www.greened.kr/news/articleView.html?idxno=337851",
+    "title": "AMAT, 차세대 메모리 협력 확대…SK하이닉스·마이크론과 공동 개발"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "케이씨텍",
+    "link": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=638978",
+    "title": "케이씨텍, SK하이닉스와 698억원 규모 반도체 장비 공급 계약 체결"
+   }
+  ],
+  "total": 73
+ },
+ "2026-03-19": {
+  "fresh_companies": 18,
+  "fresh_dart": 0,
+  "fresh_news": 34,
+  "highlights": [
+   {
+    "cat": "사업재편",
+    "company": "램리서치",
+    "link": "https://www.erountv.com/news/articleView.html?idxno=1550",
+    "title": "BESI, 하이브리드 본딩 경쟁력에 인수설 부상…램리서치·어플라이드 거론"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=437385",
+    "title": "지연됐던 수주 쏟아진다… 신성이엔지, 반도체·태양광 '쌍끌이 성장'"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "신성이엔지",
+    "link": "https://www.bloter.net/news/articleView.html?idxno=656874",
+    "title": "신성이엔지, 앰코테크코리아 송도공장 클린룸 공사 수주"
+   }
+  ],
+  "total": 73
+ },
+ "2026-03-26": {
+  "fresh_companies": 15,
+  "fresh_dart": 0,
+  "fresh_news": 30,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "예스티",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=53914",
+    "title": "예스티, 75매 고압수소어닐링 장비 첫 출하…양산 검증 시작"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "램리서치",
+    "link": "https://www.ddaily.co.kr/page/view/2026032309331784913",
+    "title": "램리서치, 국내 협력사 5곳과 컨소시엄…반도체 안전 생태계 구축"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "램리서치",
+    "link": "https://v.daum.net/v/20260323104524197",
+    "title": "램리서치코리아, '대·중소기업안전보건 상생협력사업' 모기업 선정"
+   }
+  ],
+  "total": 73
+ },
+ "2026-04-02": {
+  "fresh_companies": 22,
+  "fresh_dart": 0,
+  "fresh_news": 36,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "https://www.autodaily.co.kr/news/articleView.html?idxno=542685",
+    "title": "대당 5천억 EUV 노광장비 독점 공급하는 ASML 감원 몸살. 장비공급 차질 우려"
+   },
+   {
+    "cat": "실적",
+    "company": "램리서치",
+    "link": "https://newsroom.lamresearch.com/2026-04-01-Lam-Research-Corporation-Announces-March-Quarter-Financial-Conference-Call",
+    "title": "Lam Research Corporation Announces March Quarter Financial Conference Call - Apr 1, 2026"
+   },
+   {
+    "cat": "투자·증설",
+    "company": "엠케이전자",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=54470",
+    "title": "엠케이전자, 솔더페이스트·Pd합금 생산확대...신사업 본격화"
+   }
+  ],
+  "total": 73
+ },
+ "2026-04-09": {
+  "fresh_companies": 17,
+  "fresh_dart": 0,
+  "fresh_news": 23,
+  "highlights": [
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://daily.hankooki.com/news/articleView.html?idxno=1356343",
+    "title": "[인터뷰] 김남욱 신성이엔지 상무 “1만 FFU 솔루션, 웨이퍼 수율 관리”"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "램리서치",
+    "link": "https://www.joongang.co.kr/article/25418877",
+    "title": "숙명여대-램리서치, 반도체 인재 양성 MOU"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "원익IPS",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=54593",
+    "title": "삼성전자, 케이씨텍·원익IPS 등 우수 협력사 선정"
+   }
+  ],
+  "total": 73
+ },
+ "2026-04-16": {
+  "fresh_companies": 27,
+  "fresh_dart": 0,
+  "fresh_news": 60,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=55146",
+    "title": "ASML, 1분기 장비 출하 한국 45%로 1위...메모리 수요 덕분"
+   },
+   {
+    "cat": "실적",
+    "company": "ASML",
+    "link": "https://kr.investing.com/news/company-news/article-93CH-1899479",
+    "title": "ASML 홀딩, 2026년 1분기 실적 발표: 매출 전망 360억~400억 유로로 상향 By Investing.com"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "램리서치",
+    "link": "https://www.cctimes.kr/news/articleView.html?idxno=901689",
+    "title": "씨드콥, 로보틱스 체험 프로그램 ‘램리서치 로보 챌린지’ 참가자 모집"
+   }
+  ],
+  "total": 73
+ },
+ "2026-04-23": {
+  "fresh_companies": 17,
+  "fresh_dart": 0,
+  "fresh_news": 47,
+  "highlights": [
+   {
+    "cat": "사업재편",
+    "company": "신성이엔지",
+    "link": "https://www.snmnews.com/news/articleView.html?idxno=568402",
+    "title": "신성이엔지, 태양광 포트폴리오 사업 재편"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "도쿄일렉트론",
+    "link": "https://news.einfomax.co.kr/news/articleView.html?idxno=4411035",
+    "title": "도쿄일렉트론, 첨단 패키징용 개별 칩 검사장비 '프렉사 SDP' 출시"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "코세스",
+    "link": "https://www.hankyung.com/article/2026042032526",
+    "title": "코세스, 500억 규모 AI 서버용 전극셀 자동화 장비 공급계약"
+   }
+  ],
+  "total": 73
+ },
+ "2026-04-30": {
+  "fresh_companies": 19,
+  "fresh_dart": 0,
+  "fresh_news": 40,
+  "highlights": [
+   {
+    "cat": "실적",
+    "company": "대덕전자",
+    "link": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=661549",
+    "title": "대덕전자, 1분기 영업이익 흑자전환…512억9800만원"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "심텍",
+    "link": "https://www.newsfc.co.kr/news/articleView.html?idxno=78254",
+    "title": "심텍, 1분기 ‘SOCAMM’ 초도 물량 출하...‘흑자 전환’"
+   },
+   {
+    "cat": "실적",
+    "company": "동진쎄미켐",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=55795",
+    "title": "삼양엔씨켐 이익률이 최대고객 동진쎄미켐 '턱밑'... 올해도 최고실적 전망"
+   }
+  ],
+  "total": 73
+ },
  "2026-05-07": {
   "fresh_companies": 16,
   "fresh_dart": 0,
