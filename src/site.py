@@ -21,7 +21,7 @@ SITE_START = date(2026, 1, 1)  # 첫 주차: 1월 첫 목요일
 REPO_URL = "https://github.com/captaincatb-web/sobujang-news"
 WEEKDAY = "월화수목금토일"
 
-EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF☀-➿️]\\s*")
+EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F]\\s*")
 # 뉴스레터 본문 맨 위의 제목·발행 정보 (페이지 머리말과 겹치므로 사이트에서는 뺀다)
 INNER_HEAD_RE = re.compile(r'<h2 style="margin:0 0 4px">.*?</h2>\s*<div style="font-size:12px;[^>]*>.*?</div>', re.S)
 
