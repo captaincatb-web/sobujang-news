@@ -1088,27 +1088,27 @@
  "2026-10-22": {
   "extra_companies": 40,
   "extra_total": 249,
-  "fresh_companies": 34,
+  "fresh_companies": 33,
   "fresh_dart": 21,
-  "fresh_news": 86,
+  "fresh_news": 85,
   "highlights": [
-   {
-    "cat": "수주·협력",
-    "company": "삼성물산",
-    "link": "https://www.newsway.co.kr/news/view?ud=2026101711214415143",
-    "title": "대교·목화 이어 시범아파트까지 수주···삼성물산, 2조원대 사업 확보"
-   },
-   {
-    "cat": "기술·제품",
-    "company": "신성이엔지",
-    "link": "https://www.thebell.co.kr/free/content/ArticleView.asp?key=202610141439288800101218",
-    "title": "[더벨][SEDEX 2026] 신성이엔지 \"하이테크 환경 인프라 솔루션 기업 도약\""
-   },
    {
     "cat": "기술·제품",
     "company": "어플라이드머티어리얼즈",
     "link": "https://elec4.co.kr/contents/article_detail?article_idx=38514",
     "title": "어플라이드 머티어리얼즈 게리 디커슨 CEO \"미국 EPIC 센터는 재료 혁신에서 대량 양산까지 앞당길 것”"
+   },
+   {
+    "cat": "사업재편",
+    "company": "케이씨",
+    "link": "https://news.einfomax.co.kr/news/articleViewAmp.html?idxno=4439644",
+    "title": "케이씨 매각 숏리스트에 '트루블루' 선정…'대형 금융사 컨소' 고배 논란"
+   },
+   {
+    "cat": "실적",
+    "company": "제이티",
+    "link": "https://www.ceoeconomy.com/news/articleView.html?idxno=21841",
+    "title": "제이티, 56.8억원 규모 Sorter 체결… 매출의 14.79%"
    }
   ],
   "total": 73
