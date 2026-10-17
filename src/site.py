@@ -83,6 +83,7 @@ def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = 
   <footer class="foot">
     <div class="wrap">
       <p>기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지입니다. 기사의 저작권은 각 언론사에 있습니다.</p>
+      <p>매주 목요일 갱신</p>
     </div>
   </footer>
   {script}
