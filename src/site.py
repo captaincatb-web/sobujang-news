@@ -74,7 +74,7 @@ def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = 
   <header class="mast">
     <div class="wrap mast-row">
       <a class="mast-name" href="{home}">소부장 주간 동향</a>
-      <nav class="mast-nav" aria-label="바로가기">{nav}<a href="{REPO_URL}" rel="noopener">GitHub</a></nav>
+      <nav class="mast-nav" aria-label="바로가기">{nav}</nav>
     </div>
   </header>
   <main id="content" class="wrap">
@@ -83,7 +83,6 @@ def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = 
   <footer class="foot">
     <div class="wrap">
       <p>기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지입니다. 기사의 저작권은 각 언론사에 있습니다.</p>
-      <p>소부장 협력사 73곳 · 매주 목요일 갱신</p>
     </div>
   </footer>
   {script}
