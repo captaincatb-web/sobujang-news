@@ -146,7 +146,7 @@ def _extra_line(stats: dict) -> str:
     if not extra:
         return ""
     return (
-        f'<div style="font-size:12px;color:#6b7684;margin:-6px 0 12px">추가 A~E그룹 {extra["total_companies"]}개사 · '
+        f'<div style="font-size:12px;color:#6b7684;margin:-6px 0 12px">5그룹 {extra["total_companies"]}개사 · '
         f'뉴스 확인 <b>{extra["fresh_companies"]}곳</b> · 새 소식 <b>{extra["fresh_news"]}건</b> (뉴스 전용, 재무·주가 제외)</div>'
     )
 
@@ -217,7 +217,7 @@ def _notes(now: datetime) -> str:
         f'<div style="{META};margin-top:14px;line-height:1.6;border-top:1px solid #e5e8eb;padding-top:8px">'
         f"비고 · 수집 기간 {start.month}/{start.day}~{now.month}/{now.day}(최근 7일). "
         "제외 규칙: 주가 등락 나열·목표주가/투자의견 단신, 동명 기업·인물·일반명사 오탐, 제목에 회사명이 없는 기사, 채용·스팸. "
-        "이름이 흔해 오탐이 잦은 회사와 기존 1~4그룹과 중복된 회사는 추가 그룹에서 제외했습니다.</div>"
+        "이름이 흔해 오탐이 잦은 회사와 기존 1~4그룹과 중복된 회사는 5그룹에서 제외했습니다.</div>"
     )
 
 
@@ -306,7 +306,7 @@ GMAIL_CLIP_BYTES = 98 * 1024  # Gmail은 약 102KB를 넘는 본문을 잘라 �
 def build_newsletter_html(**kwargs) -> str:
     """추가 그룹의 헤드라인 길이를 줄여가며 Gmail 한도 안에 맞춘다 (끝까지 넘으면 그대로 반환, 호출 쪽에서 경고)"""
     html = ""
-    for compact_len, max_rows in ((56, 999), (44, 999), (34, 999), (34, 24), (34, 16), (34, 10), (34, 5)):
+    for compact_len, max_rows in ((56, 999), (44, 999), (34, 999), (34, 90), (34, 60), (34, 40), (34, 25), (34, 12)):
         html = _build_html(**kwargs, compact_len=compact_len, max_rows=max_rows)
         if len(html.encode()) <= GMAIL_CLIP_BYTES:
             break

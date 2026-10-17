@@ -35,7 +35,7 @@ def main() -> None:
     highlights = pick_highlights(selections, now)
 
     cache = Cache()
-    companies = LEGACY_COMPANIES  # 재무·주가는 기존 73개사만 (추가 A~E그룹은 뉴스 전용)
+    companies = LEGACY_COMPANIES  # 재무·주가는 기존 73개사만 (5그룹은 뉴스 전용)
     fin_cells, price_cells, price_short = {}, {}, {}
     for company in companies:
         fin_cells[company] = build_fin_summary(company, dart_key, now, cache, gemini_key, gemini_model)

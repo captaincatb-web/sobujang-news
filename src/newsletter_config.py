@@ -215,24 +215,20 @@ COMPANY_ALIAS_RAW = {
     "에바라": ["에바라", "Ebara", "에바라제작소", "에바라 제작소", "에바라펌프", "에바라정밀"], "인테그리스": ["인테그리스", "엔테그리스", "Entegris"], "이비덴": ["이비덴", "Ibiden"], "레이저텍": ["레이저텍", "레이저테크", "Lasertec"],
 }
 
-EXTRA_GROUP_NAMES = {"A": "A그룹", "B": "B그룹", "C": "C그룹", "D": "D그룹", "E": "E그룹"}
-
-
 def _name_key(name: str) -> str:
     """'코리아'·'한국' 표기 차이를 무시한 비교용 키 (어플라이드머티어리얼즈코리아 = 어플라이드머티어리얼즈)"""
     return name.lower().replace("코리아", "").replace("한국", "").replace(" ", "")
 
 
 def build_extra_groups():
-    """추가 A~E그룹 구성 → (groups, 제외 내역). 기존 73개사와 중복되거나 이름이 모호한 회사는 뺀다."""
+    """추가 5그룹 구성 → (groups, 제외 내역). 기존 73개사와 중복되거나 이름이 모호한 회사는 뺀다."""
     existing = {}
     for company in [c for g in TARGET_GROUPS for c in g["companies"]]:
         for alias in [company, *COMPANY_ALIAS_RAW.get(company, [])]:
             existing[_name_key(alias)] = company
-    groups, skipped = [], {"기존 중복": [], "이름 모호": []}
-    seen = set()
-    for n, (letter, raw) in enumerate(EXTRA_RAW.items(), start=5):
-        companies = []
+    skipped = {"기존 중복": [], "이름 모호": []}
+    seen, companies = set(), []
+    for raw in EXTRA_RAW.values():  # 원본 A~E 구분은 합쳐서 5그룹 하나로 낸다
         for name in (x.strip() for x in raw.split(",")):
             key = _name_key(name)
             if name in EXTRA_DUP_OF or key in existing or key in seen:
@@ -242,7 +238,7 @@ def build_extra_groups():
             else:
                 seen.add(key)
                 companies.append(name)
-        groups.append({"group_id": n, "group_name": f"{EXTRA_GROUP_NAMES[letter]} (추가 {len(companies)}개사)", "companies": companies, "compact": True})
+    groups = [{"group_id": 5, "group_name": f"5그룹 (추가 협력사 {len(companies)}개사)", "companies": companies, "compact": True}]
     return groups, skipped
 
 
