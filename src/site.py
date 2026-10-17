@@ -1,11 +1,13 @@
-"""주차별 뉴스 홈페이지: 정적 뉴스 사이트 (KRDS 서식, GitHub Pages)
+"""주차별 뉴스 홈페이지 (정적 사이트, GitHub Pages용 site/). 디자인 기준은 DESIGN.md.
 
-- site/index.html             7~10월 주차 목록 (월별 탭, 주요 소식 미리보기)
-- site/news/YYYY-MM-DD.html  그 주(목요일 발행일 기준)의 뉴스레터 전체 + 회사 검색
-- data/site_weeks.json       주차별 요약 (목록 페이지 재생성용)
+- site/index.html           주차 목록 (월별 구간, 주요 소식 미리보기)
+- site/news/YYYY-MM-DD.html 그 주(목요일 발행일 기준) 뉴스레터 전체 + 회사 검색
+- data/site_weeks.json      주차별 요약 (목록 재생성용)
+- data/weeks/YYYY-MM-DD.html 뉴스레터 본문 원본 (디자인을 바꿔도 모든 주차를 다시 만들 수 있게 보관)
 배포는 .github/workflows/pages.yml 이 site/ 를 올린다.
 """
 import json
+import re
 from datetime import date, datetime, timedelta
 from html import escape
 
@@ -13,9 +15,15 @@ from src.config import ROOT_DIR
 
 SITE_DIR = ROOT_DIR / "site"
 NEWS_DIR = SITE_DIR / "news"
+WEEKS_DIR = ROOT_DIR / "data" / "weeks"
 META_PATH = ROOT_DIR / "data" / "site_weeks.json"
 SITE_START = date(2026, 1, 1)  # 첫 주차: 1월 첫 목요일
 REPO_URL = "https://github.com/captaincatb-web/sobujang-news"
+WEEKDAY = "월화수목금토일"
+
+EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF☀-➿️]\\s*")
+# 뉴스레터 본문 맨 위의 제목·발행 정보 (페이지 머리말과 겹치므로 사이트에서는 뺀다)
+INNER_HEAD_RE = re.compile(r'<h2 style="margin:0 0 4px">.*?</h2>\s*<div style="font-size:12px;[^>]*>.*?</div>', re.S)
 
 
 def week_key(d: date) -> date:
@@ -38,50 +46,44 @@ def _load_meta() -> dict:
         return {}
 
 
-def _layout(*, prefix: str, title: str, crumbs: str, main: str, script: str = "") -> str:
-    """협력사 프로필 사이트와 같은 머리글·바닥글. prefix: 사이트 루트까지의 상대 경로('' 또는 '../')"""
+LEGEND_RE = re.compile(r"제목 색:.*?지분 = ", re.S)
+
+
+def _clean_body(body: str) -> str:
+    body = EMOJI_RE.sub("", INNER_HEAD_RE.sub("", body, count=1))
+    # 제목 색 안내를 이 사이트의 색(구리·검정·회색)에 맞게 바꾼다
+    return LEGEND_RE.sub("제목 색: 구리색 24시간 이내 · 검정 최근 7일 · 회색 지난 소식(8~30일) · 지분 = ", body)
+
+
+def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = "") -> str:
+    """머리말·바닥글. prefix: 사이트 루트까지의 상대 경로('' 또는 '../')"""
+    home = prefix or "./"
     return f"""<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{escape(title)} | 소부장 주간 뉴스</title>
+  <meta name="color-scheme" content="light">
+  <title>{escape(title)}</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="{prefix}vendor/phosphor/style.css">
-  <link rel="stylesheet" href="{prefix}styles.css">
+  <link rel="preload" href="{prefix}vendor/pretendard/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{prefix}news.css">
 </head>
 <body>
   <a class="skip" href="#content">본문 바로가기</a>
-  <header class="krds-header">
-    <div class="inner head-inner">
-      <ul class="utility" aria-label="관련 사이트">
-        <li><a href="https://dart.fss.or.kr" target="_blank" rel="noopener">DART 전자공시<i class="ph ph-arrow-square-out" aria-hidden="true"></i></a></li>
-        <li><a href="{REPO_URL}" target="_blank" rel="noopener">GitHub 저장소<i class="ph ph-arrow-square-out" aria-hidden="true"></i></a></li>
-      </ul>
-      <div class="branding">
-        <a class="brand" href="{prefix or './'}"><span class="brand-mark" aria-hidden="true">소</span><span class="brand-name">소부장 주간 뉴스<small>반도체 협력사 동향</small></span></a>
-      </div>
+  <header class="mast">
+    <div class="wrap mast-row">
+      <a class="mast-name" href="{home}">소부장 주간 동향</a>
+      <nav class="mast-nav" aria-label="바로가기">{nav}<a href="{REPO_URL}" rel="noopener">GitHub</a></nav>
     </div>
-    <nav class="gnb" aria-label="주 메뉴">
-      <div class="inner"><ul>
-        <li><a href="{prefix or './'}" aria-current="page">주간 뉴스</a></li>
-      </ul></div>
-    </nav>
   </header>
-  <main id="content" class="inner">
-    <nav class="breadcrumb" aria-label="현재 위치"><ol>
-      <li><a href="{prefix or './'}"><i class="ph ph-house" aria-hidden="true"></i>홈</a></li>{crumbs}
-    </ol></nav>
+  <main id="content" class="wrap">
     {main}
   </main>
-  <footer class="krds-footer">
-    <div class="inner">
-      <p class="f-logo"><span class="brand-mark" aria-hidden="true">소</span>소부장 주간 뉴스</p>
-      <div class="f-info">
-        <p><strong>매주 목요일 자동 갱신</strong> · 기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지이며, 저작권은 각 언론사에 있습니다.</p>
-      </div>
-      <div class="f-btm"><p class="f-copy">© 2026 소부장 주간 뉴스</p></div>
+  <footer class="foot">
+    <div class="wrap">
+      <p>기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지입니다. 기사의 저작권은 각 언론사에 있습니다.</p>
+      <p>소부장 협력사 73곳 · 매주 목요일 갱신</p>
     </div>
   </footer>
   {script}
@@ -91,10 +93,11 @@ def _layout(*, prefix: str, title: str, crumbs: str, main: str, script: str = ""
 
 
 def publish_week(now: datetime, body_html: str, stats: dict, highlights: list) -> None:
-    """한 주차 페이지를 쓰고 목록을 다시 만든다. highlights: [(회사, article)]"""
+    """한 주차를 저장하고 페이지·목록을 다시 만든다. highlights: [(회사, article)]"""
     key = week_key(now.date())
-    NEWS_DIR.mkdir(parents=True, exist_ok=True)
+    WEEKS_DIR.mkdir(parents=True, exist_ok=True)
     META_PATH.parent.mkdir(parents=True, exist_ok=True)
+    (WEEKS_DIR / f"{key}.html").write_text(body_html, encoding="utf-8")
     meta = _load_meta()
     meta[key.isoformat()] = {
         "fresh_news": stats["fresh_news"],
@@ -104,96 +107,201 @@ def publish_week(now: datetime, body_html: str, stats: dict, highlights: list) -
         "highlights": [{"company": c, "title": a["title"], "link": a["link"], "cat": a["cat2"]} for c, a in highlights[:3]],
     }
     META_PATH.write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
-    keys = sorted(meta)
-    i = keys.index(key.isoformat())
-    prev_b = (
-        f'<a class="btn btn-secondary btn-sm" href="{keys[i - 1]}.html"><i class="ph ph-caret-left" aria-hidden="true"></i>이전 주</a>'
-        if i > 0 else ""
-    )
-    next_b = (
-        f'<a class="btn btn-secondary btn-sm" href="{keys[i + 1]}.html">다음 주<i class="ph ph-caret-right" aria-hidden="true"></i></a>'
-        if i + 1 < len(keys) else ""
-    )
-    start = key - timedelta(days=7)
-    main = f"""
-    <section class="page-head" aria-labelledby="title">
-      <h1 id="title">{key:%Y.%m.%d}(목) 발행 · 주간 뉴스</h1>
-      <p class="lead">{start.month}/{start.day} ~ {key.month}/{key.day} · 새 소식 <strong>{stats['fresh_news']}</strong>건
-        (공시 {stats['fresh_dart']}건) · 소식 있는 회사 {stats['fresh_companies']}/{stats['total_companies']}곳</p>
-    </section>
-    <div class="news-bar">
-      <div class="sch-input"><label class="sr-only" for="q">이 주 소식 검색</label>
-        <input id="q" class="krds-input" type="search" placeholder="회사명·키워드 검색 (예: 심텍, 수주, 증설)" autocomplete="off">
-        <i class="ph ph-magnifying-glass" aria-hidden="true"></i></div>
-      <div class="news-pager"><a class="btn btn-tertiary btn-sm" href="../index.html">전체 주차</a>{prev_b}{next_b}</div>
-    </div>
-    <div class="news-body">{body_html}</div>"""
-    script = (
-        "<script>var q=document.getElementById('q');q.addEventListener('input',function(){var v=q.value.trim().toLowerCase();"
-        "document.querySelectorAll('.news-body table tr').forEach(function(r){if(r.querySelector('th'))return;"
-        "r.style.display=(!v||r.textContent.toLowerCase().indexOf(v)>-1)?'':'none';});});</script>"
-    )
-    crumbs = f'<li aria-current="page">{key:%m/%d} 주차</li>'
-    (NEWS_DIR / f"{key}.html").write_text(
-        _layout(prefix="../", title=f"주간 뉴스 {key:%m/%d}", crumbs=crumbs, main=main, script=script), encoding="utf-8"
-    )
-    build_index()
+    rebuild_all()
 
 
-def build_index() -> None:
+def rebuild_all() -> None:
+    """보관된 본문과 요약으로 모든 주차 페이지·목록·서식 파일을 다시 만든다 (디자인을 바꿨을 때도 쓴다)"""
     meta = _load_meta()
+    NEWS_DIR.mkdir(parents=True, exist_ok=True)
     SITE_DIR.mkdir(parents=True, exist_ok=True)
     (SITE_DIR / "news.css").write_text(NEWS_CSS, encoding="utf-8")
-    latest = max(meta) if meta else ""
-    months = sorted({k[:7] for k in meta}, reverse=True)
-    tabs = "".join(f'<button type="button" class="tab" data-m="{m}">{int(m[5:])}월</button>' for m in months)
-    cards = []
-    for k in sorted(meta, reverse=True):
-        d, s = date.fromisoformat(k), meta[k]
-        start = d - timedelta(days=7)
-        hl = "".join(
-            f'<li><span class="tag">{escape(h["cat"])}</span><b>{escape(h["company"])}</b> · '
-            f'<a href="{escape(h["link"])}" target="_blank" rel="noopener">{escape(h["title"])}</a></li>'
-            for h in s["highlights"]
-        )
-        badge = ' <span class="badge">최신</span>' if k == latest else ""
-        cards.append(
-            f'<article class="week-card{" is-latest" if k == latest else ""}" data-m="{k[:7]}">'
-            f'<h2><a href="news/{k}.html">{d:%Y.%m.%d}(목) 발행 주</a>{badge}</h2>'
-            f'<p class="meta">{start.month}/{start.day} ~ {d.month}/{d.day} · 새 소식 {s["fresh_news"]}건 '
-            f'(공시 {s["fresh_dart"]}건) · 소식 있는 회사 {s["fresh_companies"]}/{s["total"]}곳</p><ul>{hl}</ul></article>'
-        )
-    main = f"""
-    <section class="page-head" aria-labelledby="title">
-      <h1 id="title">주간 뉴스</h1>
-      <p class="lead">소부장 협력사 73곳의 주간 뉴스·공시 (1월~, 매주 목요일 갱신)</p>
-    </section>
-    <div class="tabs" role="group" aria-label="월 선택"><button type="button" class="tab" data-m="all">전체</button>{tabs}</div>
-    {"".join(cards)}"""
-    script = (
-        "<script>var b=document.querySelectorAll('.tabs .tab'),c=document.querySelectorAll('.week-card');"
-        "function show(m){b.forEach(function(x){x.classList.toggle('on',x.dataset.m===m)});"
-        "c.forEach(function(x){x.style.display=(m==='all'||x.dataset.m===m)?'':'none'});}"
-        "b.forEach(function(x){x.onclick=function(){show(x.dataset.m)}});show('all');</script>"
+    (SITE_DIR / ".nojekyll").write_text("", encoding="utf-8")
+    keys = sorted(meta)
+    for i, k in enumerate(keys):
+        raw = WEEKS_DIR / f"{k}.html"
+        if raw.exists():
+            _write_week_page(k, meta[k], raw.read_text(encoding="utf-8"), keys[i - 1] if i else None, keys[i + 1] if i + 1 < len(keys) else None)
+    _write_index(meta)
+
+
+def _write_week_page(k: str, s: dict, body_html: str, prev_k, next_k) -> None:
+    d = date.fromisoformat(k)
+    start = d - timedelta(days=7)
+    pager = (
+        (f'<a href="{prev_k}.html" rel="prev">← 이전 주</a>' if prev_k else '<span>← 이전 주</span>')
+        + (f'<a href="{next_k}.html" rel="next">다음 주 →</a>' if next_k else '<span>다음 주 →</span>')
     )
-    (SITE_DIR / "index.html").write_text(
-        _layout(prefix="", title="주간 뉴스", crumbs='', main=main, script=script),
+    main = f"""
+    <section class="hero">
+      <p class="kicker">{d.year}년 {d.month}월 {d.day}일 {WEEKDAY[d.weekday()]}요일 발행 · {start.month}/{start.day} ~ {d.month}/{d.day}</p>
+      <h1>이번 주 소식 <em>{s['fresh_news']}</em>건</h1>
+      <p class="sub">공시 {s['fresh_dart']}건 포함 · 소식이 있는 회사 {s['fresh_companies']}곳 / {s['total']}곳</p>
+    </section>
+    <div class="tools">
+      <label class="search"><span class="sr">이 주 소식 검색</span>
+        <input id="q" type="search" placeholder="회사명·키워드로 찾기  (예: 심텍, 수주, 증설)" autocomplete="off"></label>
+      <nav class="pager" aria-label="주차 이동"><a href="../index.html">전체 주차</a>{pager}</nav>
+    </div>
+    <p class="none" id="none" hidden>찾는 내용이 이 주차에 없습니다.</p>
+    <div class="news-body">{_clean_body(body_html)}</div>"""
+    script = (
+        "<script>var q=document.getElementById('q'),n=document.getElementById('none');"
+        "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),c=0;"
+        "document.querySelectorAll('.news-body table tr').forEach(function(r){if(r.querySelector('th'))return;"
+        "var ok=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.style.display=ok?'':'none';if(ok)c++;});n.hidden=!v||c>0;});</script>"
+    )
+    (NEWS_DIR / f"{k}.html").write_text(
+        _layout(prefix="../", title=f"{d:%m/%d} 주간 동향 · 소부장 주간 동향", main=main, script=script, nav='<a href="../index.html">전체 주차</a>'),
         encoding="utf-8",
     )
 
 
-NEWS_CSS = """/* 주간 뉴스 페이지 추가 서식 (기본 색·글꼴은 styles.css 의 KRDS 값을 따른다) */
-.page-head .lead{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
-.tab{min-height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
-.tab.on{background:var(--selected);border-color:var(--selected);color:#fff;font-weight:700}
-.week-card{border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0;background:var(--surface)}
-.week-card.is-latest{border-color:var(--primary);border-width:2px}
-.week-card h2{margin:0 0 4px;font-size:21px}.week-card h2 a{color:var(--text-strong);text-decoration:none}
-.week-card h2 a:hover{text-decoration:underline}.week-card .meta{margin:0 0 8px;font-size:15px;color:var(--text-3)}
-.week-card ul{margin:0;padding-left:20px;font-size:16px;line-height:1.7}.week-card .tag{font-size:12px;background:var(--subtle);padding:1px 6px;margin-right:6px;border-radius:4px}
-.badge{font-size:12px;background:var(--primary);color:#fff;border-radius:999px;padding:2px 8px;vertical-align:middle}
-.news-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:16px 0}
-.news-bar .sch-input{flex:1;min-width:240px}.news-pager{display:flex;gap:8px}
-.news-body{background:#fff;color:#191f28;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto}
+def _write_index(meta: dict) -> None:
+    keys = sorted(meta, reverse=True)
+    if not keys:
+        return
+    latest = keys[0]
+    ls = meta[latest]
+    ld = date.fromisoformat(latest)
+
+    def heads(s, n=3):
+        return "".join(
+            f'<li><span class="cat">{escape(h["cat"])}</span><b>{escape(h["company"])}</b> '
+            f'<a href="{escape(h["link"])}" target="_blank" rel="noopener">{escape(h["title"])}</a></li>'
+            for h in s["highlights"][:n]
+        )
+
+    feature = f"""
+    <section class="feature" aria-labelledby="latest">
+      <p class="kicker">최신 · {ld.year}.{ld.month:02d}.{ld.day:02d}({WEEKDAY[ld.weekday()]}) 발행</p>
+      <h1 id="latest"><a href="news/{latest}.html">이번 주 소식 <em>{ls['fresh_news']}</em>건</a></h1>
+      <p class="sub">공시 {ls['fresh_dart']}건 포함 · 소식이 있는 회사 {ls['fresh_companies']}곳 / {ls['total']}곳</p>
+      <ul class="heads">{heads(ls)}</ul>
+      <p><a class="go" href="news/{latest}.html">이 주 전체 보기 →</a></p>
+    </section>"""
+
+    months = sorted({k[:7] for k in keys}, reverse=True)
+    groups = []
+    for m in months:
+        rows = []
+        for k in [k for k in keys if k[:7] == m and k != latest]:
+            d, s = date.fromisoformat(k), meta[k]
+            rows.append(
+                f'<li class="row"><a class="date" href="news/{k}.html"><span class="d">{d.month}.{d.day:02d}</span>'
+                f'<span class="w">{WEEKDAY[d.weekday()]}</span></a>'
+                f'<ul class="heads">{heads(s, 2)}</ul>'
+                f'<p class="count"><b>{s["fresh_news"]}</b>건<br><span>{s["fresh_companies"]}/{s["total"]}곳</span></p></li>'
+            )
+        if rows:
+            groups.append(f'<section class="month" id="m{m}"><h2>{int(m[5:])}월</h2><ol class="rows">{"".join(rows)}</ol></section>')
+    toc = "".join(f'<a href="#m{m}">{int(m[5:])}월</a>' for m in months)
+    main = f"""{feature}
+    <nav class="toc" aria-label="월 바로가기"><span>지난 주차</span>{toc}</nav>
+    {"".join(groups)}"""
+    (SITE_DIR / "index.html").write_text(_layout(prefix="", title="소부장 주간 동향", main=main), encoding="utf-8")
+
+
+NEWS_CSS = """/* 디자인 기준: DESIGN.md */
+@font-face{font-family:"Pretendard Variable";font-weight:45 920;font-display:swap;src:local("Pretendard Variable"),url("vendor/pretendard/PretendardVariable.woff2") format("woff2-variations")}
+:root{--paper:#f6f4ee;--ink:#17191c;--sub:#5d6168;--dim:#8a8d92;--rule:#d8d3c6;--cu:#a8480f;--up:#d0342c;--down:#2a62c4}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 "Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-variant-numeric:tabular-nums;word-break:keep-all}
+a{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:#b8b2a2}
+a:hover{text-decoration-color:var(--cu);color:var(--cu)}
+a:focus-visible,input:focus-visible{outline:2px solid var(--cu);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.sr,.skip:not(:focus){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip:focus{position:fixed;top:8px;left:8px;background:var(--ink);color:#fff;padding:8px 12px;z-index:9}
+/* 마스트헤드 */
+.mast{border-top:4px solid var(--ink);border-bottom:1px solid var(--ink)}
+.mast-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:14px;padding-bottom:12px}
+.mast-name{font-size:20px;font-weight:800;letter-spacing:-.02em;text-decoration:none}
+.mast-nav{display:flex;gap:18px;font-size:14px}
+.mast-nav a{text-decoration:none;color:var(--sub)}.mast-nav a:hover{color:var(--cu)}
+/* 머리말 */
+.kicker{margin:36px 0 8px;font-size:14px;font-weight:600;color:var(--cu);letter-spacing:.01em}
+h1{margin:0;font-size:clamp(34px,6vw,56px);line-height:1.12;font-weight:800;letter-spacing:-.035em}
+h1 em{font-style:normal;color:var(--cu)}
+h1 a{text-decoration:none}h1 a:hover{color:inherit}
+.sub{margin:12px 0 0;font-size:17px;color:var(--sub)}
+/* 최신 주차 */
+.feature{padding-bottom:28px;border-bottom:2px solid var(--ink)}
+.heads{list-style:none;margin:22px 0 0;padding:0}
+.heads li{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--rule);font-size:17px}
+.heads li:first-child{border-top:0}
+.feature .heads li{font-size:19px}
+.cat{flex:none;min-width:4.6em;font-size:12px;font-weight:600;color:var(--sub);letter-spacing:.02em}
+.heads b{flex:none;font-weight:800}
+.go{display:inline-block;margin-top:14px;font-weight:600;color:var(--cu);text-decoration:none;border-bottom:2px solid var(--cu)}
+.go:hover{color:var(--ink);border-color:var(--ink)}
+/* 지난 주차 */
+.toc{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:baseline;margin:26px 0 0;padding:10px 0;border-bottom:1px solid var(--rule);font-size:15px}
+.toc span{font-size:13px;color:var(--sub);margin-right:6px}
+.toc a{text-decoration:none;font-weight:600}
+.month{margin-top:30px}
+.month h2{margin:0;padding-bottom:8px;border-bottom:2px solid var(--ink);font-size:22px;font-weight:800;letter-spacing:-.02em}
+.rows{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:84px 1fr 92px;gap:0 18px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start}
+.date{text-decoration:none;display:flex;flex-direction:column;line-height:1.1}
+.date .d{font-size:26px;font-weight:800;letter-spacing:-.03em}
+.date .w{font-size:12px;color:var(--sub);margin-top:4px}
+.date:hover .d{color:var(--cu)}
+.row .heads{margin:0}
+.row .heads li{padding:3px 0;border:0;font-size:16px}
+.count{margin:0;text-align:right;font-size:14px;color:var(--sub);line-height:1.35}
+.count b{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.count span{font-size:12px}
+/* 주차 페이지 */
+.hero{padding-bottom:6px}
+.tools{display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between;align-items:center;margin:22px 0 4px;padding:12px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.search{flex:1 1 280px;max-width:440px}
+.search input{width:100%;height:44px;padding:0 12px;border:1px solid #9b9686;border-radius:0;background:#fff;font:inherit;font-size:16px;color:var(--ink)}
+.pager{display:flex;gap:18px;font-size:14px;font-weight:600}
+.pager a{text-decoration:none}.pager a:hover{color:var(--cu)}.pager span{color:var(--dim)}
+.none{margin:20px 0;color:var(--sub)}
+/* 본문(뉴스레터 HTML 재서식: 인라인 서식을 이 사이트 기준으로 덮어쓴다) */
+.news-body{margin-top:8px;font-size:15px;max-width:none!important}
+.news-body *{font-family:inherit!important}
+.news-body div[style*="max-width:1000px"]{max-width:none!important}
+.news-body div[style*="border-radius:8px"]{border:0!important;border-top:2px solid var(--ink)!important;border-radius:0!important;background:transparent!important;padding:14px 0 6px!important;margin:18px 0 6px!important}
+.news-body div[style*="font-weight:bold"]{font-size:14px!important;color:var(--cu);letter-spacing:.02em}
+.news-body h3{border:0!important;border-top:2px solid var(--ink)!important;padding:12px 0 0!important;margin:34px 0 4px!important;font-size:21px!important;font-weight:800!important;letter-spacing:-.02em}
+.news-body table{border:0!important;border-collapse:collapse!important;width:100%;margin-bottom:8px!important}
+.news-body th,.news-body td{border:0!important;border-top:1px solid var(--rule)!important;padding:12px 10px 12px 0!important;vertical-align:top;background:transparent!important}
+.news-body tr{background:transparent!important}
+.news-body th{font-size:12px!important;font-weight:600!important;color:var(--sub);text-align:left!important;letter-spacing:.02em;border-top:1px solid var(--ink)!important;padding:8px 10px 8px 0!important}
+.news-body td:first-child{width:19%;min-width:110px}
+.news-body td b{font-weight:700}
+.news-body td[colspan]{color:var(--sub)!important}
+.news-body a[style*="#f04452"]{color:var(--cu)!important}
+.news-body a[style*="#3182f6"]{color:var(--ink)!important}
+.news-body a[style*="#8b95a1"]{color:var(--dim)!important}
+.news-body a{text-decoration:underline!important;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:#c9c3b4}
+.news-body span[style*="background:#f2f4f6"]{background:transparent!important;color:var(--sub)!important;padding:0!important;margin-right:4px;font-size:11px!important;font-weight:600;letter-spacing:.02em;border-left:2px solid var(--cu);padding-left:6px!important}
+.news-body span[style*="background:#e8f3ff"]{background:transparent!important;border:0!important;color:var(--sub)!important;font-weight:600;padding:0!important;border-left:2px solid var(--ink)!important;padding-left:6px!important}
+.news-body [style*="color:#8b95a1"],.news-body [style*="color:#6b7684"]{color:var(--sub)!important}
+.news-body font[color="#f04452"],.news-body span[style*="color:#f04452"]{color:var(--up)!important}
+.news-body font[color="#3182f6"],.news-body span[style*="color:#3182f6"]{color:var(--down)!important}
+.news-body b[style*="color:#f04452"],.news-body b[style*="color:#3182f6"]{color:var(--ink)!important}
+.news-body div[style*="margin:0 0 7px"] span[style*="font-size:11px"]{white-space:nowrap}
+/* 바닥글 */
+.foot{margin-top:56px;border-top:1px solid var(--ink);padding:18px 0 40px;font-size:13px;color:var(--sub)}
+.foot p{margin:0 0 4px}
+/* 모바일 */
+@media (max-width:640px){
+  body{font-size:16px}
+  .wrap{padding:0 16px}
+  .kicker{margin-top:26px}
+  .row{grid-template-columns:62px 1fr;gap:0 12px}
+  .count{grid-column:2;text-align:left;margin-top:6px;display:flex;gap:6px;align-items:baseline}
+  .count br{display:none}
+  .date .d{font-size:22px}
+  .heads li{flex-wrap:wrap;gap:2px 8px;font-size:16px}
+  .cat{min-width:0}
+  .news-body td:first-child{width:27%;min-width:84px}
+  .news-body th,.news-body td{padding:10px 8px 10px 0!important}
+  .pager{width:100%;justify-content:space-between}
+}
 """
