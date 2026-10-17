@@ -7,7 +7,7 @@ from src import site
 from src.history import KST
 from src.newsletter import build_stats, resolve_links
 from src.newsletter_collector import collect_articles, group_similar
-from src.newsletter_config import TARGET_GROUPS, all_company_names
+from src.newsletter_config import LEGACY_COMPANIES, TARGET_GROUPS, all_company_names
 from src.newsletter_html import build_newsletter_html
 from src.newsletter_rank import pick_highlights, select_company
 
@@ -19,7 +19,9 @@ def build_week(key) -> None:
     selections = {c: select_company(a, now) for c, a in grouped.items()}
     highlights = pick_highlights(selections, now)
     companies = all_company_names()
-    stats = build_stats(grouped, now, len(companies))
+    stats = build_stats(grouped, now, len(LEGACY_COMPANIES), LEGACY_COMPANIES)
+    extra = [c for c in companies if c not in set(LEGACY_COMPANIES)]
+    stats["extra"] = build_stats(grouped, now, len(extra), extra)
     html = build_newsletter_html(
         now=now, groups=TARGET_GROUPS, selections=selections, highlights=highlights, movers=([], []), stats=stats,
         fin_cells={}, price_cells={c: "" for c in companies}, price_short={c: "" for c in companies}, show_fin=False,

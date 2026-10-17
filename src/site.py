@@ -104,6 +104,8 @@ def publish_week(now: datetime, body_html: str, stats: dict, highlights: list) -
         "fresh_dart": stats["fresh_dart"],
         "fresh_companies": stats["fresh_companies"],
         "total": stats["total_companies"],
+        "extra_companies": (stats.get("extra") or {}).get("fresh_companies"),
+        "extra_total": (stats.get("extra") or {}).get("total_companies"),
         "highlights": [{"company": c, "title": a["title"], "link": a["link"], "cat": a["cat2"]} for c, a in highlights[:3]],
     }
     META_PATH.write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")

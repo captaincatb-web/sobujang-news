@@ -1,6 +1,7 @@
 import re
 
 from src.config import ROOT_DIR
+from src.newsletter_extra_groups import EXTRA_AMBIGUOUS, EXTRA_DUP_OF, EXTRA_RAW
 
 # ============================================================
 #  [뉴스레터 2호] 1~4그룹 소부장 파트너사 동향 (Google Apps Script 버전 이식)
@@ -172,15 +173,20 @@ NEWS_CATEGORIES = [
     ("기술·제품", re.compile(r"기술\s*개발|신기술|세계\s*최초|국산화|특허|양산|신제품|출시|개발|R&D|연구|공개|선보|전시|참가|박람회|솔루션|플랫폼|launch|unveil|develop", re.I)),
     ("경영·인사", re.compile(r"대표\s*이사|CEO|이사회|사외\s*이사|경영진|지배\s*구조|주주\s*총회|취임|선임|인사|임원")),
     ("시장·전망", re.compile(r"전망|수요|시장|성장|전략|업황|호황|가격|인상|인하|점유율")),
-    ("ESG·사회", re.compile(r"탄소\s*중립|ESG|RE100|친환경|재활용|자원\s*순환|사회\s*공헌|수상|봉사|기부|후원|어워즈|컴플라이언스|가족")),
+    ("행사·방문", re.compile(r"박람회|세미나|포럼|컨퍼런스|간담회|방문|개막|전시회|SEDEX|워크숍|설명회\s*개최|페스티벌")),
+    ("ESG·사회", re.compile(r"기탁|나눔|취약계층|전달식|맞손|탄소\s*중립|ESG|RE100|친환경|재활용|자원\s*순환|사회\s*공헌|수상|봉사|기부|후원|어워즈|컴플라이언스|가족")),
 ]
 
 # 기사 중요도 가중치 (순위·주요 소식 선정용). 지분변동은 정기 소유보고·국민연금 지분 변동 같은 반복성 소식이라 뒤로 미룬다.
 CATEGORY_WEIGHT = {
     "수주·협력": 5, "사업재편": 5, "실적": 4, "투자·증설": 4, "기술·제품": 4,
     "자금조달": 3, "분쟁·소송": 3, "경영·인사": 2, "시장·전망": 2, "공시": 2,
-    "ESG·사회": 1, "기타동향": 1, "지분변동": -3,
+    "ESG·사회": 1, "행사·방문": 1, "기타동향": 1, "지분변동": -3,
 }
+# 비중이 낮은 분류는 회사당 1건만 보여 준다 (중요 소식이 있으면 그 자리를 양보)
+LOW_VALUE_CATEGORIES = {"기타동향", "행사·방문", "ESG·사회"}
+# 분석·전망성 기사 표현 (소식이라기보다 의견이라 순위를 낮춘다)
+OPINION_RE = re.compile(r"주목|관건|가능성|기대감|전망이다|수혜|전략|분석|리포트|칼럼|인터뷰")
 ROUTINE_CATEGORY = "지분변동"
 HIGHLIGHT_MIN_WEIGHT = 4  # 이 이상인 분류만 '이번 주 주요 소식' 후보
 HIGHLIGHT_COUNT = 6
@@ -208,6 +214,44 @@ COMPANY_ALIAS_RAW = {
     "램리서치": ["램리서치", "Lam Research"], "도쿄일렉트론": ["도쿄일렉트론", "TEL", "Tokyo Electron"], "KLA": ["KLA", "케이엘에이"],
     "에바라": ["에바라", "Ebara", "에바라제작소", "에바라 제작소", "에바라펌프", "에바라정밀"], "인테그리스": ["인테그리스", "엔테그리스", "Entegris"], "이비덴": ["이비덴", "Ibiden"], "레이저텍": ["레이저텍", "레이저테크", "Lasertec"],
 }
+
+EXTRA_GROUP_NAMES = {"A": "A그룹", "B": "B그룹", "C": "C그룹", "D": "D그룹", "E": "E그룹"}
+
+
+def _name_key(name: str) -> str:
+    """'코리아'·'한국' 표기 차이를 무시한 비교용 키 (어플라이드머티어리얼즈코리아 = 어플라이드머티어리얼즈)"""
+    return name.lower().replace("코리아", "").replace("한국", "").replace(" ", "")
+
+
+def build_extra_groups():
+    """추가 A~E그룹 구성 → (groups, 제외 내역). 기존 73개사와 중복되거나 이름이 모호한 회사는 뺀다."""
+    existing = {}
+    for company in [c for g in TARGET_GROUPS for c in g["companies"]]:
+        for alias in [company, *COMPANY_ALIAS_RAW.get(company, [])]:
+            existing[_name_key(alias)] = company
+    groups, skipped = [], {"기존 중복": [], "이름 모호": []}
+    seen = set()
+    for n, (letter, raw) in enumerate(EXTRA_RAW.items(), start=5):
+        companies = []
+        for name in (x.strip() for x in raw.split(",")):
+            key = _name_key(name)
+            if name in EXTRA_DUP_OF or key in existing or key in seen:
+                skipped["기존 중복"].append(name)
+            elif name in EXTRA_AMBIGUOUS or len(name) <= 2:
+                skipped["이름 모호"].append(name)
+            else:
+                seen.add(key)
+                companies.append(name)
+        groups.append({"group_id": n, "group_name": f"{EXTRA_GROUP_NAMES[letter]} (추가 {len(companies)}개사)", "companies": companies, "compact": True})
+    return groups, skipped
+
+
+EXTRA_GROUPS, EXTRA_SKIPPED = build_extra_groups()
+for _g in EXTRA_GROUPS:
+    for _c in _g["companies"]:
+        COMPANY_ALIAS_RAW.setdefault(_c, [_c])
+TARGET_GROUPS = TARGET_GROUPS + EXTRA_GROUPS
+LEGACY_COMPANIES = [c for g in TARGET_GROUPS if not g.get("compact") for c in g["companies"]]
 
 # 4그룹 해외 9개사 티커 (DART 데이터 없음)
 FOREIGN_TICKERS = {

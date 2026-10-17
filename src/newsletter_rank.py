@@ -7,8 +7,12 @@ from src.newsletter_config import (
     FRESH_DAYS,
     HIGHLIGHT_COUNT,
     HIGHLIGHT_MIN_WEIGHT,
+    LOW_VALUE_CATEGORIES,
+    OPINION_RE,
     ROUTINE_CATEGORY,
 )
+
+AI_IMPORTANCE_STEP = 0.8  # AI가 매긴 중요도(1~5) 3을 기준으로 1점당 가산
 
 
 def age_days(now: datetime, article: dict) -> float:
@@ -29,7 +33,9 @@ def score(article: dict, now: datetime) -> float:
     filed = 1 if article["cat3"] != "공시자료" and any(m["cat3"] == "공시자료" for m in article["similar_articles"]) else 0
     # 영문 기사(해외 기업)는 국문 기사가 없을 때 보완용
     foreign = 0 if HANGUL_RE.search(article["title"]) else -2
-    return CATEGORY_WEIGHT.get(article["cat2"], 1) + recency + coverage + filed + foreign
+    opinion = -1 if article["cat3"] != "공시자료" and OPINION_RE.search(article["title"]) else 0
+    ai = (article["ai"]["importance"] - 3) * AI_IMPORTANCE_STEP if article.get("ai") else 0
+    return CATEGORY_WEIGHT.get(article["cat2"], 1) + recency + coverage + filed + foreign + opinion + ai
 
 
 def select_company(articles: list, now: datetime) -> dict:
@@ -42,7 +48,15 @@ def select_company(articles: list, now: datetime) -> dict:
     fresh = [a for a in articles if age_days(now, a) <= FRESH_DAYS]
     main = sorted((a for a in fresh if not is_routine(a)), key=lambda a: score(a, now), reverse=True)
     routine = [a for a in fresh if is_routine(a)]
-    shown = main[:FIXED_COMPANY_LIMIT]
+    shown, low = [], 0
+    for a in main:
+        if a["cat2"] in LOW_VALUE_CATEGORIES:
+            if low >= 1:
+                continue  # 행사·기부·단순 동향은 회사당 1건까지
+            low += 1
+        shown.append(a)
+        if len(shown) >= FIXED_COMPANY_LIMIT:
+            break
 
     older = None
     if not shown:
@@ -71,10 +85,12 @@ def pick_highlights(selections: dict, now: datetime, count: int = HIGHLIGHT_COUN
     return picked
 
 
-def candidate_articles(articles: list, now: datetime) -> list:
+def candidate_articles(articles: list, now: datetime, compact: bool = False) -> list:
     """원문 링크 변환·검증 대상: 메일에 오를 가능성이 있는 기사와 그 유사기사"""
     fresh = [a for a in articles if age_days(now, a) <= FRESH_DAYS]
     main = sorted((a for a in fresh if not is_routine(a)), key=lambda a: score(a, now), reverse=True)
+    if compact:  # 추가 그룹은 대표 기사 1건만 보이므로 링크 변환 대상도 최소로
+        return main[:2]
     routine = [a for a in fresh if is_routine(a)]
     older = [a for a in articles if age_days(now, a) > FRESH_DAYS and not is_routine(a)]
     picked = main[: FIXED_COMPANY_LIMIT + 2] + routine[:2] + older[:2]

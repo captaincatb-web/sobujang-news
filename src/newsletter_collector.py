@@ -6,7 +6,6 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from urllib.parse import quote
 
 import feedparser
 import requests
@@ -38,7 +37,7 @@ PHOTO_CAPTION_RE = re.compile(r"[\(\[〈][^\)\]〉]*사진[^\)\]〉]*[\)\]〉]\s
 PHOTO_TAG_RE = re.compile(r"^\s*[\(\[〈]\s*포토\s*[\)\]〉]")
 
 STOCK_NOISE_RE = re.compile(
-    r"(특징주|테마주|수혜주|관련주|주도주|대장주|고래사냥|내일장|주식민원|투자전략|테마\s*상승|투자분석|주달|52주|신고가|신저가|외국인\s*대량|순매도|순매수|코스닥|코스피|급등|급락|상한가|하한가|증시일정|리포트|총정리|상승여력|목표가|올릴\s*종목|폭등|반도체주|장비주|동반\s*상승|동반\s*폭등|주목을|방긋|초고수|사고.*팔았다|질주|가격\s*부담|상쇄|자신감|헬로스톡|주목할\s*종목|싸다|증권|실적\s*감안|기대감도|차익실현|매수\s*추천|칩칩폭폭|딸깍|전량매도|전량매수|매수일지|투자일지|매매일기|매매복기|추천부터|손절|존버|물타기|줍줍|영끌|풀매수|풀매도|시선강탈|공략법|불타오르네|%\s*[↑↓]|장중|현재가|원선에서|만원대\s*(상승|하락)|%\s*(올라|뛰어|내려|빠져|하락에)|기술적\s*분석|지지선|저항선|움직였습니다|주식\s*\d선|기판주|소재주|부품주|장비주|강세|약세|최선호주|선호주|탑픽|애널리스트|투자\s*포인트|저평가|고평가|증시|투자\s*캘린더|프리뷰|체크포인트|월가|株|재주목|애프터마켓|프리마켓|상승폭|하락폭|장\s*마감|마감\s*시황|매수세|매도세|주요\s*공시|경제\s*일정|주간\s*일정|(?:상승|하락)\s*vi\b|\d+만\s*\d*\s*원(?:대|으로|에|선)|%\s*대\s*(?:상승|하락|강세|약세)|가격\s*내역|과거\s*데이터|tokenized|xstock|마감\s*분석|기업\s*주식\s*정보|원\s*마감(?!재))"
+    r"(특징주|테마주|수혜주|관련주|주도주|대장주|고래사냥|내일장|주식민원|투자전략|테마\s*상승|투자분석|주달|52주|신고가|신저가|외국인\s*대량|순매도|순매수|코스닥|코스피|급등|급락|상한가|하한가|증시일정|리포트|총정리|상승여력|목표가|올릴\s*종목|폭등|반도체주|장비주|동반\s*상승|동반\s*폭등|주목을|방긋|초고수|사고.*팔았다|질주|가격\s*부담|상쇄|자신감|헬로스톡|주목할\s*종목|싸다|증권|실적\s*감안|기대감도|차익실현|매수\s*추천|칩칩폭폭|딸깍|전량매도|전량매수|매수일지|투자일지|매매일기|매매복기|추천부터|손절|존버|물타기|줍줍|영끌|풀매수|풀매도|시선강탈|공략법|불타오르네|%\s*[↑↓]|장중|현재가|원선에서|만원대\s*(상승|하락)|%\s*(올라|뛰어|내려|빠져|하락에)|기술적\s*분석|지지선|저항선|움직였습니다|주식\s*\d선|기판주|소재주|부품주|장비주|강세|약세|최선호주|선호주|탑픽|애널리스트|투자\s*포인트|저평가|고평가|증시|투자\s*캘린더|프리뷰|체크포인트|월가|株|재주목|애프터마켓|프리마켓|상승폭|하락폭|장\s*마감|마감\s*시황|매수세|매도세|주요\s*공시|경제\s*일정|주간\s*일정|(?:상승|하락)\s*vi\b|\d+만\s*\d*\s*원(?:대|으로|에|선|[…·,])|etf|골라\s*담|%\s*대\s*(?:상승|하락|강세|약세)|가격\s*내역|과거\s*데이터|tokenized|xstock|마감\s*분석|기업\s*주식\s*정보|원\s*마감(?!재))"
 )
 STOCK_BRACKET_RE = re.compile(r"\[.*(강세|약세|특징|종목|테마|토픽|시황|고래|주식|베스트).*\].*")
 BROKER_RE = re.compile(
@@ -180,18 +179,27 @@ def find_companies(clean_title: str, alias_map: dict) -> list:
     if "와이씨켐" in lower or "ycchem" in lower or "yc chem" in lower:
         return []
 
-    matched = {}
+    spans = []  # (시작, 끝, 회사)
     for alias in sorted(alias_map, key=len, reverse=True):
         if ASCII_ALIAS_RE.match(alias):
             # 순수 영문/숫자 alias는 단어 경계 매칭 (예: "di"가 "nvidia"에 걸리는 오탐 차단)
-            if re.search(r"(^|[^a-z0-9])" + re.escape(alias) + r"([^a-z0-9]|$)", lower):
-                matched[alias_map[alias]] = True
+            pattern = r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])"
         elif len(alias) <= 2:
             # '테스','후성' 같은 두 글자 이름은 '카르테스'처럼 다른 단어 안에 들어간 경우를 제외
-            if re.search(r"(^|[^가-힣\-])" + re.escape(alias), lower):
-                matched[alias_map[alias]] = True
-        elif alias in lower:
-            matched[alias_map[alias]] = True
+            pattern = r"(?<![가-힣\-])" + re.escape(alias)
+        else:
+            pattern = re.escape(alias)
+        for m in re.finditer(pattern, lower):
+            spans.append((m.start(), m.end(), alias_map[alias]))
+    # 더 긴 다른 회사명 안에 든 이름은 제외 (예: '디아이텍' 안의 '디아이', '피에스케이홀딩스' 안의 '피에스케이')
+    matched = {}
+    for start, end, company in spans:
+        inside_longer = any(
+            o_company != company and o_start <= start and end <= o_end and (o_end - o_start) > (end - start)
+            for o_start, o_end, o_company in spans
+        )
+        if not inside_longer:
+            matched[company] = True
     return list(matched)
 
 
@@ -478,10 +486,14 @@ def _news_drop_reason(clean_title: str, link: str, src_name: str) -> str:
     return ""
 
 
+FALSE_POSITIVE_CASES: list = []  # 이번 수집에서 동명이인·오탐으로 제외한 최근 기사 [(회사, 제목)] — 메일의 '오탐 제외 사례'용
+
+
 def collect_articles(asof: datetime | None = None) -> dict:
     """DART + RSS + 구글뉴스 + 포털 뉴스검색 수집 → {회사명: [article, ...]} (회사별 최신순 상위 N건)"""
     alias_map = build_alias_map()
     sources = build_sources(asof)
+    FALSE_POSITIVE_CASES.clear()
 
     with ThreadPoolExecutor(max_workers=16) as pool:
         feeds = list(pool.map(_fetch_feed, sources))
@@ -558,6 +570,12 @@ def collect_articles(asof: datetime | None = None) -> dict:
                 reasons["동명이인·오탐"] += 1
                 if pub_date >= fresh_cutoff:
                     dropped.append(("동명이인·오탐", ",".join(names), kind, src_name, clean_title))
+                    FALSE_POSITIVE_CASES.extend((c, clean_title) for c in names)
+            if not HANGUL_RE.search(clean_title):
+                # 영문 기사는 해외 기업 칸에만 (국내사 칸에 섞인 외신·광고성 기사 차단)
+                if any(c not in ENGLISH_SEARCH_TERMS for c in matched):
+                    reasons["영문 국내사"] += 1
+                matched = [c for c in matched if c in ENGLISH_SEARCH_TERMS]
             for company in matched:
                 valid_articles.append({**base, "company": company, "cat3": "기업동향"})
             kept[kind] += bool(matched)
