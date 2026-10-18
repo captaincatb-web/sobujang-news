@@ -159,11 +159,10 @@ COMPACT_TABLE = (
 
 def _compact_group(group: dict, selections: dict, now: datetime, title_len: int = 56, max_rows: int = 999) -> str:
     """추가 그룹: 최근 7일 뉴스가 확인된 회사만 '회사 | 헤드라인 | 언론사·날짜 | 분류' 한 줄씩, 나머지는 이름만"""
-    rows, quiet, scored = [], [], []
+    rows, scored = [], []
     for company in group["companies"]:
         shown = (selections.get(company) or {"shown": []})["shown"]
         if not shown:
-            quiet.append(get_display_name(company))
             continue
         a = shown[0]
         more = f" 외 {len(shown) - 1 + len(a['similar_articles'])}건" if len(shown) > 1 or a["similar_articles"] else ""
@@ -193,22 +192,7 @@ def _compact_group(group: dict, selections: dict, now: datetime, title_len: int 
             f'<div style="color:#6b7684;line-height:1.8;font-size:11px;margin-bottom:6px">📰 <b>그 외 소식 있는 회사 ({len(overflow)}곳, 지면 제한으로 제목 생략)</b> · '
             + " · ".join(overflow) + "</div>"
         )
-    if quiet:
-        out.append(
-            f'<div style="color:#6b7684;line-height:1.8;font-size:11px;margin-bottom:8px">📭 <b>최근 7일 뉴스 미확인 ({len(quiet)}곳)</b> · '
-            + " · ".join(quiet) + "</div>"
-        )
     return "".join(out)
-
-
-def _fp_cases(cases: list) -> str:
-    if not cases:
-        return ""
-    lines = "".join(
-        f'<div style="{META};margin:1px 0">{escape(c)} · {escape(t if len(t) <= 56 else t[:54].rstrip() + "…")}</div>' for c, t in cases[:15]
-    )
-    more = f'<div style="{META}">외 {len(cases) - 15}건</div>' if len(cases) > 15 else ""
-    return f'<div style="margin:18px 0 6px"><b style="font-size:13px">🚫 오탐 제외 사례</b> <span style="{META}">(회사 · 제목만 표시)</span>{lines}{more}</div>'
 
 
 def _notes(now: datetime) -> str:
@@ -294,7 +278,6 @@ def _build_html(
                 f'📭 <b>새 소식 없음 ({len(quiet)}곳)</b> · ' + " · ".join(quiet) + "</td></tr>"
             )
         out.append("</table>")
-    out.append(_fp_cases(stats.get("fp_cases") or []))
     out.append(_notes(now))
     out.append("</div>")
     return "".join(out)

@@ -49,7 +49,13 @@ def _load_meta() -> dict:
 LEGEND_RE = re.compile(r"제목 색:.*?지분 = ", re.S)
 
 
+# 이미 저장된 주차 본문에 들어 있는 '오탐 제외 사례'와 5그룹 '뉴스 미확인' 목록은 페이지에서 뺀다
+FP_BLOCK_RE = re.compile(r'<div style="margin:18px 0 6px"><b style="font-size:13px">🚫 오탐 제외 사례.*?(?=<div style="font-size:11px;color:#8b95a1;margin-top:14px)', re.S)
+QUIET_BLOCK_RE = re.compile(r'<div style="color:#6b7684;line-height:1.8;font-size:11px;margin-bottom:8px">📭 <b>최근 7일 뉴스 미확인.*?</div>', re.S)
+
+
 def _clean_body(body: str) -> str:
+    body = QUIET_BLOCK_RE.sub("", FP_BLOCK_RE.sub("", body))
     body = EMOJI_RE.sub("", INNER_HEAD_RE.sub("", body, count=1))
     # 제목 색 안내를 이 사이트의 색(구리·검정·회색)에 맞게 바꾼다
     return LEGEND_RE.sub("제목 색: 구리색 24시간 이내 · 검정 최근 7일 · 회색 지난 소식(8~30일) · 지분 = ", body)
