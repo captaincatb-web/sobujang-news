@@ -1086,29 +1086,29 @@
   "total": 73
  },
  "2026-10-22": {
-  "extra_companies": 40,
+  "extra_companies": 38,
   "extra_total": 249,
-  "fresh_companies": 33,
-  "fresh_dart": 21,
-  "fresh_news": 85,
+  "fresh_companies": 31,
+  "fresh_dart": 14,
+  "fresh_news": 89,
   "highlights": [
    {
     "cat": "기술·제품",
-    "company": "어플라이드머티어리얼즈",
-    "link": "https://elec4.co.kr/contents/article_detail?article_idx=38514",
-    "title": "어플라이드 머티어리얼즈 게리 디커슨 CEO \"미국 EPIC 센터는 재료 혁신에서 대량 양산까지 앞당길 것”"
+    "company": "ASML",
+    "link": "https://www.econovill.com/news/articleView.html?idxno=754353",
+    "title": "머스크 “ASML, 테라팹 장비 인도 앞당겨”…2028년 하반기 반도체 양산 목표"
    },
    {
-    "cat": "사업재편",
-    "company": "케이씨",
-    "link": "https://news.einfomax.co.kr/news/articleViewAmp.html?idxno=4439644",
-    "title": "케이씨 매각 숏리스트에 '트루블루' 선정…'대형 금융사 컨소' 고배 논란"
+    "cat": "기술·제품",
+    "company": "교세라",
+    "link": "https://www.ggilbo.com/news/articleView.html?idxno=1187266",
+    "title": "르세라핌, 교세라돔서 ‘AEIOU’ 최초 공개… 첫 무대 언제?"
    },
    {
-    "cat": "실적",
-    "company": "제이티",
-    "link": "https://www.ceoeconomy.com/news/articleView.html?idxno=21841",
-    "title": "제이티, 56.8억원 규모 Sorter 체결… 매출의 14.79%"
+    "cat": "수주·협력",
+    "company": "한성크린텍",
+    "link": "https://www.etoday.co.kr/news/view/2635952",
+    "title": "밸류파인더 “한성크린텍, 삼성전기 베트남서 지난해 수출액 5배 규모 수주…후속 계약 가능”"
    }
   ],
   "total": 73
