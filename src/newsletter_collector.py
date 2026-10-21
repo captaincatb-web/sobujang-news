@@ -66,6 +66,8 @@ FALSE_POSITIVE_PATTERNS = {
     "티에스이": r"엘디티",
     "디엔에프": r"서경디엔에프|서경dnf",
     "에바라": r"jitsugyo|에바라실업",
+    "교세라": r"교세라\s*돔|돔서|르세라핌|콘서트|공연|팬미팅|월드\s*투어|내한|걸그룹|아이돌|오릭스|한신|야구|야마가타",
+    "교세라한국": r"교세라\s*돔|돔서|르세라핌|콘서트|공연|팬미팅|월드\s*투어|내한|걸그룹|아이돌|오릭스|한신|야구",
     "KLA": r"코소보|kosovo|해방군|liberation army|전쟁\s*범죄|헤이그",
 }
 FALSE_POSITIVE_RE = {k: re.compile(v) for k, v in FALSE_POSITIVE_PATTERNS.items()}
