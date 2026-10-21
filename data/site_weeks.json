@@ -1086,29 +1086,29 @@
   "total": 73
  },
  "2026-10-22": {
-  "extra_companies": 37,
+  "extra_companies": 19,
   "extra_total": 249,
-  "fresh_companies": 31,
-  "fresh_dart": 14,
-  "fresh_news": 87,
+  "fresh_companies": 18,
+  "fresh_dart": 6,
+  "fresh_news": 47,
   "highlights": [
    {
-    "cat": "기술·제품",
+    "cat": "수주·협력",
     "company": "ASML",
-    "link": "https://www.econovill.com/news/articleView.html?idxno=754353",
-    "title": "머스크 “ASML, 테라팹 장비 인도 앞당겨”…2028년 하반기 반도체 양산 목표"
+    "link": "https://www.tokenpost.kr/news/tech/425509",
+    "title": "ASML 등 테라팹 장비 납품 빨라졌다…머스크 '일정 매우 촉박'"
    },
    {
     "cat": "수주·협력",
-    "company": "한성크린텍",
-    "link": "https://www.etoday.co.kr/news/view/2635952",
-    "title": "밸류파인더 “한성크린텍, 삼성전기 베트남서 지난해 수출액 5배 규모 수주…후속 계약 가능”"
+    "company": "삼성물산",
+    "link": "https://www.koreareport.co.kr/news/articleView.html?idxno=53854",
+    "title": "삼성물산, '바인드' 중심 스마트빌딩 협력 확대"
    },
    {
-    "cat": "수주·협력",
-    "company": "고영테크놀러지",
-    "link": "https://n.news.naver.com/article/366/0001199401?sid=105",
-    "title": "고영테크놀러지, 中 AI 서버 공급망서 신규 수주… 반도체 검사시장 공략"
+    "cat": "투자·증설",
+    "company": "삼성전기",
+    "link": "https://www.mediafine.co.kr/news/articleView.html?idxno=93318",
+    "title": "삼성전기·엔비디아, AI 반도체 기판 공동 투자…국내 생산라인 증설"
    }
   ],
   "total": 73
