@@ -1086,11 +1086,11 @@
   "total": 73
  },
  "2026-10-22": {
-  "extra_companies": 38,
+  "extra_companies": 37,
   "extra_total": 249,
   "fresh_companies": 31,
   "fresh_dart": 14,
-  "fresh_news": 89,
+  "fresh_news": 87,
   "highlights": [
    {
     "cat": "기술·제품",
@@ -1099,16 +1099,16 @@
     "title": "머스크 “ASML, 테라팹 장비 인도 앞당겨”…2028년 하반기 반도체 양산 목표"
    },
    {
-    "cat": "기술·제품",
-    "company": "교세라",
-    "link": "https://www.ggilbo.com/news/articleView.html?idxno=1187266",
-    "title": "르세라핌, 교세라돔서 ‘AEIOU’ 최초 공개… 첫 무대 언제?"
-   },
-   {
     "cat": "수주·협력",
     "company": "한성크린텍",
     "link": "https://www.etoday.co.kr/news/view/2635952",
     "title": "밸류파인더 “한성크린텍, 삼성전기 베트남서 지난해 수출액 5배 규모 수주…후속 계약 가능”"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "고영테크놀러지",
+    "link": "https://n.news.naver.com/article/366/0001199401?sid=105",
+    "title": "고영테크놀러지, 中 AI 서버 공급망서 신규 수주… 반도체 검사시장 공략"
    }
   ],
   "total": 73
