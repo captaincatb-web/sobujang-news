@@ -1112,5 +1112,33 @@
    }
   ],
   "total": 73
+ },
+ "2026-10-29": {
+  "extra_companies": 38,
+  "extra_total": 249,
+  "fresh_companies": 31,
+  "fresh_dart": 10,
+  "fresh_news": 90,
+  "highlights": [
+   {
+    "cat": "투자·증설",
+    "company": "피에스케이",
+    "link": "https://www.jejutwn.com/news/article.html?no=464657",
+    "title": "피에스케이 용인 반도체클러스터에 1800억원 투자"
+   },
+   {
+    "cat": "투자·증설",
+    "company": "대덕전자",
+    "link": "https://www.jejutwn.com/news/article.html?no=464656",
+    "title": "대덕전자, 반도체 설비에 6150억원 투자…2030년까지"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "티엘비",
+    "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=498243",
+    "title": "AI 서버가 키운 티엘비… SOCAMM 출하 확대에 수익성 개선"
+   }
+  ],
+  "total": 73
  }
 }
