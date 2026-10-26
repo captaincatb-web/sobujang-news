@@ -245,9 +245,16 @@ def _build_html(
         if group.get("compact"):
             out.append(_compact_group(group, selections, now, compact_len, max_rows))
             continue
+        def top_score(c):  # 새 소식이 있는 회사부터, 가장 중요한 기사 점수가 높은 순 (없는 회사는 원래 순서 유지)
+            shown = (selections.get(c) or {"shown": []})["shown"]
+            return -score(shown[0], now) if shown else 99
+
+        ordered = sorted(group["companies"], key=top_score)
+        n_news = sum(1 for c in ordered if (selections.get(c) or {"shown": []})["shown"])
         out.append(
             f'<h3 style="margin:22px 0 8px;font-size:15px;border-left:4px solid #3182f6;padding-left:8px">{group["group_name"]}</h3>'
         )
+        out.append(f'<div style="{META};margin:-4px 0 6px">새 소식 {n_news}곳 · 중요도순</div>')
         out.append(TABLE)
         out.append(
             '<tr bgcolor="#f2f4f6" style="color:#4e5968"><th width="19%" style="white-space:nowrap">회사·주가</th>'
@@ -257,7 +264,7 @@ def _build_html(
 
         older_rows, quiet = [], []
         alt = False
-        for company in group["companies"]:
+        for company in ordered:
             sel = selections.get(company) or {"shown": [], "routine": [], "older": None}
             lead_fin = f'<td valign="top" style="font-size:11px">{fin_cells[company]}</td>' if show_fin else ""
             if sel["shown"]:
