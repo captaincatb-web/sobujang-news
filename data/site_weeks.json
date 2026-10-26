@@ -1114,11 +1114,11 @@
   "total": 73
  },
  "2026-10-29": {
-  "extra_companies": 40,
+  "extra_companies": 41,
   "extra_total": 249,
-  "fresh_companies": 31,
+  "fresh_companies": 30,
   "fresh_dart": 12,
-  "fresh_news": 92,
+  "fresh_news": 91,
   "highlights": [
    {
     "cat": "수주·협력",
@@ -1127,16 +1127,16 @@
     "title": "충청북도, 한솔아이원스와 1560억 원 규모 투자협약"
    },
    {
-    "cat": "수주·협력",
-    "company": "효성중공업",
-    "link": "http://m.wsobi.com/news/articleView.html?idxno=320365",
-    "title": "[산업계 9월 동향] 효성중공업, 미국서 대규모 수주 확보·한전 대용량 전압형 HVDC 국산화-실증사업 참여·경력보유여성 취업 지원"
-   },
-   {
     "cat": "투자·증설",
     "company": "피에스케이",
     "link": "https://newsyonhap.com/news/132936",
     "title": "피에스케이, 용인 캠퍼스에 1800억원 투자 결정"
+   },
+   {
+    "cat": "기술·제품",
+    "company": "신성이엔지",
+    "link": "https://www.hvacrj.co.kr/news/articleView.html?idxno=31371",
+    "title": "신성이엔지, ‘데이터센터코리아 2026’서 AI 데이터센터 통합 솔루션 선보인다"
    }
   ],
   "total": 73
