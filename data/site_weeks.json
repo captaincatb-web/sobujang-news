@@ -1114,29 +1114,29 @@
   "total": 73
  },
  "2026-10-29": {
-  "extra_companies": 38,
+  "extra_companies": 40,
   "extra_total": 249,
   "fresh_companies": 31,
-  "fresh_dart": 10,
-  "fresh_news": 90,
+  "fresh_dart": 12,
+  "fresh_news": 92,
   "highlights": [
    {
-    "cat": "투자·증설",
-    "company": "피에스케이",
-    "link": "https://www.jejutwn.com/news/article.html?no=464657",
-    "title": "피에스케이 용인 반도체클러스터에 1800억원 투자"
-   },
-   {
-    "cat": "투자·증설",
-    "company": "대덕전자",
-    "link": "https://www.jejutwn.com/news/article.html?no=464656",
-    "title": "대덕전자, 반도체 설비에 6150억원 투자…2030년까지"
+    "cat": "수주·협력",
+    "company": "한솔아이원스",
+    "link": "https://n.news.naver.com/article/057/0001975134?sid=004",
+    "title": "충청북도, 한솔아이원스와 1560억 원 규모 투자협약"
    },
    {
     "cat": "수주·협력",
-    "company": "티엘비",
-    "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=498243",
-    "title": "AI 서버가 키운 티엘비… SOCAMM 출하 확대에 수익성 개선"
+    "company": "효성중공업",
+    "link": "http://m.wsobi.com/news/articleView.html?idxno=320365",
+    "title": "[산업계 9월 동향] 효성중공업, 미국서 대규모 수주 확보·한전 대용량 전압형 HVDC 국산화-실증사업 참여·경력보유여성 취업 지원"
+   },
+   {
+    "cat": "투자·증설",
+    "company": "피에스케이",
+    "link": "https://newsyonhap.com/news/132936",
+    "title": "피에스케이, 용인 캠퍼스에 1800억원 투자 결정"
    }
   ],
   "total": 73
