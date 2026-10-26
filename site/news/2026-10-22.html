@@ -28,6 +28,7 @@
       <label class="search"><span class="sr">이 주 소식 검색</span>
         <input id="q" type="search" placeholder="회사명·키워드로 찾기  (예: 심텍, 수주, 증설)" autocomplete="off"></label>
       <nav class="pager" aria-label="주차 이동"><a href="2026-10-15.html" rel="prev">← 이전 주</a><a href="2026-10-29.html" rel="next">다음 주 →</a></nav>
+      <button type="button" id="wbtn" class="wbtn" aria-pressed="false">★ 관심 회사만 <span id="wn">0</span></button>
       <nav class="jump" aria-label="그룹 이동"><span>바로가기</span><a href="#g1">1그룹</a><a href="#g2">2그룹</a><a href="#g3">3그룹</a><a href="#g4">4그룹</a><a href="#g5">5그룹</a></nav>
     </div>
     <p class="none" id="none" role="status" aria-live="polite" hidden></p>
@@ -40,16 +41,32 @@
     </div>
   </footer>
   <script>
-var q=document.getElementById('q'),n=document.getElementById('none'),body=document.querySelector('.news-body');
+var q=document.getElementById('q'),n=document.getElementById('none'),body=document.querySelector('.news-body'),wbtn=document.getElementById('wbtn'),wn=document.getElementById('wn');
+var W=[],watchOnly=false;try{W=JSON.parse(localStorage.getItem('watch')||'[]')}catch(e){}
+function save(){try{localStorage.setItem('watch',JSON.stringify(W))}catch(e){}}
+function dataRows(){return Array.prototype.filter.call(body.querySelectorAll('table tr'),function(r){return !r.querySelector('th')&&!r.querySelector('td[colspan]')});}
+// 회사 이름 옆에 관심 표시(★) 버튼: 이 브라우저에만 저장된다
+dataRows().forEach(function(r){var b=r.querySelector('td b');if(!b)return;var name=b.textContent.trim();r.setAttribute('data-co',name);
+  var btn=document.createElement('button');btn.type='button';btn.className='star';
+  function paint(){var on=W.indexOf(name)>-1;btn.textContent=on?'★':'☆';btn.setAttribute('aria-pressed',on?'true':'false');btn.setAttribute('aria-label',name+(on?' 관심 회사 해제':' 관심 회사로 추가'));}
+  btn.onclick=function(){var i=W.indexOf(name);if(i>-1)W.splice(i,1);else W.push(name);save();document.querySelectorAll('.star').forEach(function(x){x.onpaint&&x.onpaint()});paint();wn.textContent=W.length;run();};
+  btn.onpaint=paint;paint();b.parentNode.insertBefore(btn,b);});
+wn.textContent=W.length;
+wbtn.addEventListener('click',function(){watchOnly=!watchOnly;wbtn.setAttribute('aria-pressed',watchOnly?'true':'false');run();});
 function run(){
-  var v=q.value.trim().toLowerCase(),c=0,rows=body.querySelectorAll('table tr');
-  rows.forEach(function(r){if(r.querySelector('th'))return;var ok=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.style.display=ok?'':'none';if(ok&&!r.querySelector('td[colspan]'))c++;});
-  // 결과가 없는 그룹은 제목·표 머리까지 숨기고, 검색 중에는 요약 블록도 접는다
+  var v=q.value.trim().toLowerCase(),c=0;
+  body.querySelectorAll('table tr').forEach(function(r){if(r.querySelector('th'))return;
+    var q1=!v||r.textContent.toLowerCase().indexOf(v)>-1,w1=!watchOnly||(r.getAttribute('data-co')&&W.indexOf(r.getAttribute('data-co'))>-1);
+    var ok=q1&&w1;r.style.display=ok?'':'none';if(ok&&!r.querySelector('td[colspan]'))c++;});
+  var filtering=!!v||watchOnly;
+  // 결과가 없는 그룹은 제목·표 머리까지 숨기고, 걸러 보는 중에는 요약 블록도 접는다
   body.querySelectorAll('h2').forEach(function(h){var t=h.nextElementSibling;while(t&&t.tagName!=='TABLE'&&t.tagName!=='H2')t=t.nextElementSibling;
-    var show=!v||(t&&t.tagName==='TABLE'&&Array.prototype.some.call(t.querySelectorAll('tr'),function(r){return !r.querySelector('th')&&r.style.display!=='none'}));
+    var show=!filtering||(t&&t.tagName==='TABLE'&&Array.prototype.some.call(t.querySelectorAll('tr'),function(r){return !r.querySelector('th')&&r.style.display!=='none'}));
     h.style.display=show?'':'none';if(t&&t.tagName==='TABLE')t.style.display=show?'':'none';});
-  Array.prototype.forEach.call(body.children,function(el){if(el.tagName!=='H2'&&el.tagName!=='TABLE'&&!el.matches('div[style*="font-size:11px"]'))el.style.display=v?'none':'';});
-  n.hidden=!v;n.textContent=v?(c?'“'+q.value.trim()+'” '+c+'곳에서 찾았습니다.':'“'+q.value.trim()+'”가 이 주차에 없습니다. 다른 주차도 찾아보세요.'):'';
+  Array.prototype.forEach.call(body.children,function(el){if(el.tagName!=='H2'&&el.tagName!=='TABLE'&&!el.matches('div[style*="font-size:11px"]'))el.style.display=filtering?'none':'';});
+  n.hidden=!filtering;
+  var label=(v?'“'+q.value.trim()+'” ':'')+(watchOnly?'(관심 회사) ':'');
+  n.textContent=filtering?(c?label+c+'곳에서 찾았습니다.':(watchOnly&&!v&&!W.length?'회사 이름 옆의 ☆를 눌러 관심 회사를 추가하세요.':label+'이 주차에 없습니다. 다른 주차도 찾아보세요.')):'';
   try{history.replaceState(null,'',v?'#q='+encodeURIComponent(q.value.trim()):location.pathname)}catch(e){}
 }
 q.addEventListener('input',run);

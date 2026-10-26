@@ -39,11 +39,13 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 .month{margin-top:30px}
 .month h2{margin:0;padding-bottom:8px;border-bottom:2px solid var(--ink);font-size:22px;font-weight:800;letter-spacing:-.02em}
 .rows{list-style:none;margin:0;padding:0}
-.row{display:grid;grid-template-columns:84px 1fr 92px;gap:0 18px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start}
+.row{position:relative;display:grid;grid-template-columns:84px 1fr 92px;gap:0 18px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start}
 .date{text-decoration:none;display:flex;flex-direction:column;line-height:1.1}
 .date .d{font-size:26px;font-weight:800;letter-spacing:-.03em}
 .date .w{font-size:12px;color:var(--sub);margin-top:4px}
 .date:hover .d{color:var(--cu)}
+.date::after{content:"";position:absolute;inset:0}
+.row .heads a{position:relative;z-index:1}
 .row .heads{margin:0}
 .row .heads li{padding:3px 0;border:0;font-size:16px}
 .count{margin:0;text-align:right;font-size:14px;color:var(--sub);line-height:1.35}
@@ -60,6 +62,10 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 .pager{display:flex;gap:18px;font-size:14px;font-weight:600}
 .pager a,.pager span{display:inline-block;padding:11px 0}.pager a{text-decoration:none}.pager a:hover{color:var(--cu)}.pager span{color:var(--dim)}
 .none{margin:14px 0;color:var(--sub)}
+.wbtn{height:44px;padding:0 14px;border:1px solid #9b9686;background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.wbtn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.star{border:0;background:transparent;color:var(--cu);font-size:18px;line-height:1;padding:6px 6px 6px 0;margin:-6px 0;cursor:pointer;vertical-align:middle;min-width:28px;min-height:36px}
+.star:focus-visible,.wbtn:focus-visible{outline:2px solid var(--cu);outline-offset:2px}
 html{scroll-padding-top:120px}
 /* 본문(뉴스레터 HTML 재서식: 인라인 서식을 이 사이트 기준으로 덮어쓴다) */
 .news-body{margin-top:8px;font-size:15px;max-width:none!important}

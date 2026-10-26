@@ -174,21 +174,38 @@ def _write_week_page(k: str, s: dict, body_html: str, prev_k, next_k) -> None:
       <label class="search"><span class="sr">이 주 소식 검색</span>
         <input id="q" type="search" placeholder="회사명·키워드로 찾기  (예: 심텍, 수주, 증설)" autocomplete="off"></label>
       <nav class="pager" aria-label="주차 이동">{pager}</nav>
+      <button type="button" id="wbtn" class="wbtn" aria-pressed="false">★ 관심 회사만 <span id="wn">0</span></button>
       <nav class="jump" aria-label="그룹 이동"><span>바로가기</span>{jump}</nav>
     </div>
     <p class="none" id="none" role="status" aria-live="polite" hidden></p>
     <div class="news-body">{cleaned}</div>"""
     script = """<script>
-var q=document.getElementById('q'),n=document.getElementById('none'),body=document.querySelector('.news-body');
+var q=document.getElementById('q'),n=document.getElementById('none'),body=document.querySelector('.news-body'),wbtn=document.getElementById('wbtn'),wn=document.getElementById('wn');
+var W=[],watchOnly=false;try{W=JSON.parse(localStorage.getItem('watch')||'[]')}catch(e){}
+function save(){try{localStorage.setItem('watch',JSON.stringify(W))}catch(e){}}
+function dataRows(){return Array.prototype.filter.call(body.querySelectorAll('table tr'),function(r){return !r.querySelector('th')&&!r.querySelector('td[colspan]')});}
+// 회사 이름 옆에 관심 표시(★) 버튼: 이 브라우저에만 저장된다
+dataRows().forEach(function(r){var b=r.querySelector('td b');if(!b)return;var name=b.textContent.trim();r.setAttribute('data-co',name);
+  var btn=document.createElement('button');btn.type='button';btn.className='star';
+  function paint(){var on=W.indexOf(name)>-1;btn.textContent=on?'\u2605':'\u2606';btn.setAttribute('aria-pressed',on?'true':'false');btn.setAttribute('aria-label',name+(on?' \uad00\uc2ec \ud68c\uc0ac \ud574\uc81c':' \uad00\uc2ec \ud68c\uc0ac\ub85c \ucd94\uac00'));}
+  btn.onclick=function(){var i=W.indexOf(name);if(i>-1)W.splice(i,1);else W.push(name);save();document.querySelectorAll('.star').forEach(function(x){x.onpaint&&x.onpaint()});paint();wn.textContent=W.length;run();};
+  btn.onpaint=paint;paint();b.parentNode.insertBefore(btn,b);});
+wn.textContent=W.length;
+wbtn.addEventListener('click',function(){watchOnly=!watchOnly;wbtn.setAttribute('aria-pressed',watchOnly?'true':'false');run();});
 function run(){
-  var v=q.value.trim().toLowerCase(),c=0,rows=body.querySelectorAll('table tr');
-  rows.forEach(function(r){if(r.querySelector('th'))return;var ok=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.style.display=ok?'':'none';if(ok&&!r.querySelector('td[colspan]'))c++;});
-  // 결과가 없는 그룹은 제목·표 머리까지 숨기고, 검색 중에는 요약 블록도 접는다
+  var v=q.value.trim().toLowerCase(),c=0;
+  body.querySelectorAll('table tr').forEach(function(r){if(r.querySelector('th'))return;
+    var q1=!v||r.textContent.toLowerCase().indexOf(v)>-1,w1=!watchOnly||(r.getAttribute('data-co')&&W.indexOf(r.getAttribute('data-co'))>-1);
+    var ok=q1&&w1;r.style.display=ok?'':'none';if(ok&&!r.querySelector('td[colspan]'))c++;});
+  var filtering=!!v||watchOnly;
+  // 결과가 없는 그룹은 제목·표 머리까지 숨기고, 걸러 보는 중에는 요약 블록도 접는다
   body.querySelectorAll('h2').forEach(function(h){var t=h.nextElementSibling;while(t&&t.tagName!=='TABLE'&&t.tagName!=='H2')t=t.nextElementSibling;
-    var show=!v||(t&&t.tagName==='TABLE'&&Array.prototype.some.call(t.querySelectorAll('tr'),function(r){return !r.querySelector('th')&&r.style.display!=='none'}));
+    var show=!filtering||(t&&t.tagName==='TABLE'&&Array.prototype.some.call(t.querySelectorAll('tr'),function(r){return !r.querySelector('th')&&r.style.display!=='none'}));
     h.style.display=show?'':'none';if(t&&t.tagName==='TABLE')t.style.display=show?'':'none';});
-  Array.prototype.forEach.call(body.children,function(el){if(el.tagName!=='H2'&&el.tagName!=='TABLE'&&!el.matches('div[style*="font-size:11px"]'))el.style.display=v?'none':'';});
-  n.hidden=!v;n.textContent=v?(c?'\u201c'+q.value.trim()+'\u201d '+c+'\uacf3\uc5d0\uc11c \ucc3e\uc558\uc2b5\ub2c8\ub2e4.':'\u201c'+q.value.trim()+'\u201d\uac00 \uc774 \uc8fc\ucc28\uc5d0 \uc5c6\uc2b5\ub2c8\ub2e4. \ub2e4\ub978 \uc8fc\ucc28\ub3c4 \ucc3e\uc544\ubcf4\uc138\uc694.'):'';
+  Array.prototype.forEach.call(body.children,function(el){if(el.tagName!=='H2'&&el.tagName!=='TABLE'&&!el.matches('div[style*="font-size:11px"]'))el.style.display=filtering?'none':'';});
+  n.hidden=!filtering;
+  var label=(v?'\u201c'+q.value.trim()+'\u201d ':'')+(watchOnly?'(\uad00\uc2ec \ud68c\uc0ac) ':'');
+  n.textContent=filtering?(c?label+c+'\uacf3\uc5d0\uc11c \ucc3e\uc558\uc2b5\ub2c8\ub2e4.':(watchOnly&&!v&&!W.length?'\ud68c\uc0ac \uc774\ub984 \uc606\uc758 \u2606\ub97c \ub20c\ub7ec \uad00\uc2ec \ud68c\uc0ac\ub97c \ucd94\uac00\ud558\uc138\uc694.':label+'\uc774 \uc8fc\ucc28\uc5d0 \uc5c6\uc2b5\ub2c8\ub2e4. \ub2e4\ub978 \uc8fc\ucc28\ub3c4 \ucc3e\uc544\ubcf4\uc138\uc694.')):'';
   try{history.replaceState(null,'',v?'#q='+encodeURIComponent(q.value.trim()):location.pathname)}catch(e){}
 }
 q.addEventListener('input',run);
@@ -220,7 +237,7 @@ def _write_index(meta: dict) -> None:
     <section class="feature" aria-labelledby="latest">
       <p class="kicker">최신 · {ld.year}.{ld.month:02d}.{ld.day:02d}({WEEKDAY[ld.weekday()]}) 발행</p>
       <h1 id="latest"><a href="news/{latest}.html">이번 주 소식 <em>{ls['fresh_news']}</em>건</a></h1>
-      <p class="sub">공시 {ls['fresh_dart']}건 포함 · 소식이 있는 회사 {ls['fresh_companies']}곳 / {ls['total']}곳</p>
+      <p class="sub">1~4그룹 {ls['total']}곳 기준 · 공시 {ls['fresh_dart']}건 포함 · 소식이 있는 회사 {ls['fresh_companies']}곳</p>
       <ul class="heads">{heads(ls)}</ul>
       <p><a class="go" href="news/{latest}.html">이 주 전체 보기 →</a></p>
     </section>"""
@@ -287,11 +304,13 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 .month{margin-top:30px}
 .month h2{margin:0;padding-bottom:8px;border-bottom:2px solid var(--ink);font-size:22px;font-weight:800;letter-spacing:-.02em}
 .rows{list-style:none;margin:0;padding:0}
-.row{display:grid;grid-template-columns:84px 1fr 92px;gap:0 18px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start}
+.row{position:relative;display:grid;grid-template-columns:84px 1fr 92px;gap:0 18px;padding:14px 0;border-bottom:1px solid var(--rule);align-items:start}
 .date{text-decoration:none;display:flex;flex-direction:column;line-height:1.1}
 .date .d{font-size:26px;font-weight:800;letter-spacing:-.03em}
 .date .w{font-size:12px;color:var(--sub);margin-top:4px}
 .date:hover .d{color:var(--cu)}
+.date::after{content:"";position:absolute;inset:0}
+.row .heads a{position:relative;z-index:1}
 .row .heads{margin:0}
 .row .heads li{padding:3px 0;border:0;font-size:16px}
 .count{margin:0;text-align:right;font-size:14px;color:var(--sub);line-height:1.35}
@@ -308,6 +327,10 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 .pager{display:flex;gap:18px;font-size:14px;font-weight:600}
 .pager a,.pager span{display:inline-block;padding:11px 0}.pager a{text-decoration:none}.pager a:hover{color:var(--cu)}.pager span{color:var(--dim)}
 .none{margin:14px 0;color:var(--sub)}
+.wbtn{height:44px;padding:0 14px;border:1px solid #9b9686;background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.wbtn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.star{border:0;background:transparent;color:var(--cu);font-size:18px;line-height:1;padding:6px 6px 6px 0;margin:-6px 0;cursor:pointer;vertical-align:middle;min-width:28px;min-height:36px}
+.star:focus-visible,.wbtn:focus-visible{outline:2px solid var(--cu);outline-offset:2px}
 html{scroll-padding-top:120px}
 /* 본문(뉴스레터 HTML 재서식: 인라인 서식을 이 사이트 기준으로 덮어쓴다) */
 .news-body{margin-top:8px;font-size:15px;max-width:none!important}
