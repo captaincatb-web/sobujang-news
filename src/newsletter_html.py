@@ -33,7 +33,10 @@ def _meta(article: dict) -> str:
     return f'{escape(article["source"])}{more} · {article["date_str"]}'
 
 
-def _article(article: dict, now: datetime, show_sim: bool = True) -> str:
+def _article(article: dict, now: datetime, show_sim: bool = True, ref: bool = False) -> str:
+    if ref:  # 위 '이번 주 주요 소식'에 이미 실린 기사는 같은 내용을 다시 풀어 쓰지 않는다
+        short = article["title"] if len(article["title"]) <= 30 else article["title"][:28].rstrip() + "…"
+        return f'<div style="margin:2px 0 7px">{_badge(article)} <span style="{META}">↑ 주요 소식에 게재 · {escape(short)}</span></div>'
     age = age_days(now, article)
     out = (
         f'<div style="margin:2px 0 7px">{_badge(article)} '
@@ -94,7 +97,7 @@ def _header(now: datetime, stats: dict) -> str:
         f'<div style="font-size:12px;color:#6b7684;margin-bottom:12px">'
         f'{now.year}.{now.month:02d}.{now.day:02d}({WEEKDAYS[now.weekday()]}) 발행 · '
         f"수집 기간 {start.month}/{start.day} ~ {now.month}/{now.day} · "
-        f'이번 주 새 소식 <b>{stats["fresh_news"]}건</b>{_delta(stats["fresh_news"], prev.get("fresh_news"))} '
+        f'1~4그룹 이번 주 새 소식 <b>{stats["fresh_news"]}건</b>{_delta(stats["fresh_news"], prev.get("fresh_news"))} '
         f'(공시 {stats["fresh_dart"]}건) · '
         f'소식 있는 회사 {stats["fresh_companies"]}/{stats["total_companies"]}곳'
         f'{_delta(stats["fresh_companies"], prev.get("fresh_companies"))}'
@@ -111,7 +114,11 @@ def _highlights(highlights: list) -> str:
     for company, a in highlights:
         title = a["title"] if len(a["title"]) <= 42 else a["title"][:40].rstrip() + "…"
         amount = AMOUNT_RE.search(a["title"])
-        chip = f' <b style="color:#3182f6">{escape(amount.group(0).strip())}</b>' if amount else ""
+        chip = (
+            f' <b style="color:#3182f6">{escape(amount.group(0).strip())}</b>'
+            if amount and amount.group(0).strip() not in title
+            else ""
+        )
         rows.append(
             f'<div style="margin:0 0 7px">{_badge(a)} <b>{get_display_name(company)}</b> · '
             f'<a href="{escape(a["link"])}" title="{escape(a["title"])}" style="color:#191f28;text-decoration:none">{escape(title)}</a>'
@@ -147,7 +154,7 @@ def _extra_line(stats: dict) -> str:
         return ""
     return (
         f'<div style="font-size:12px;color:#6b7684;margin:-6px 0 12px">5그룹 {extra["total_companies"]}개사 · '
-        f'뉴스 확인 <b>{extra["fresh_companies"]}곳</b> · 새 소식 <b>{extra["fresh_news"]}건</b> (뉴스 전용, 재무·주가 제외)</div>'
+        f'소식 있는 회사 <b>{extra["fresh_companies"]}곳</b> (뉴스 전용, 재무·주가 제외)</div>'
     )
 
 
@@ -168,14 +175,17 @@ def _compact_group(group: dict, selections: dict, now: datetime, title_len: int 
         more = f" 외 {len(shown) - 1 + len(a['similar_articles'])}건" if len(shown) > 1 or a["similar_articles"] else ""
         # 한 통(Gmail 100KB 한도)에 담기 위해 행 마크업을 최소화한다 (스타일 대신 속성·font 태그)
         title = a["title"] if len(a["title"]) <= title_len else a["title"][: title_len - 2].rstrip() + "…"
-        scored.append((score(a, now), get_display_name(company)))
+        scored.append((score(a, now), get_display_name(company), a["pub_date"]))
         rows.append(
             f'<tr valign="top"><td><b>{get_display_name(company)}</b></td>'
             f'<td><a href="{escape(a["link"])}" style="color:{_title_color(age_days(now, a))};text-decoration:none">{escape(title)}</a></td>'
             f'<td><font color="#8b95a1" size="1">{escape(a["source"])}{more}<br>{a["date_str"]}</font></td>'
             f'<td><font color="#4e5968" size="1">{a["cat2"]}</font></td></tr>'
         )
+    order = sorted(range(len(rows)), key=lambda i: scored[i][2], reverse=True)  # 최신 소식이 위로
+    rows, scored = [rows[i] for i in order], [scored[i] for i in order]
     out = [f'<h3 style="margin:22px 0 8px;font-size:15px;border-left:4px solid #8b95a1;padding-left:8px">{group["group_name"]}</h3>']
+    out.append(f'<div style="{META};margin:-4px 0 6px">소식이 확인된 {len(rows)}곳 · 최신 소식순</div>')
     overflow = []
     if len(rows) > max_rows:  # 한도 초과: 점수가 높은 회사의 행만 남기고 나머지는 이름만
         keep = set(sorted(range(len(rows)), key=lambda i: scored[i][0], reverse=True)[:max_rows])
@@ -221,6 +231,7 @@ def _build_html(
     max_rows: int = 999,
 ) -> str:
     cols = 3 if show_fin else 2
+    hl_links = {a["link"] for _, a in highlights}
     out = ['<div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:1000px;color:#191f28">']
     out.append(_header(now, stats))
     out.append(_highlights(highlights))
@@ -252,7 +263,7 @@ def _build_html(
             if sel["shown"]:
                 alt = not alt
                 bg = "#f8f9fa" if alt else "#ffffff"
-                news = "".join(_article(a, now) for a in sel["shown"]) + _routine_line(sel["routine"])
+                news = "".join(_article(a, now, ref=a["link"] in hl_links) for a in sel["shown"]) + _routine_line(sel["routine"])
                 out.append(
                     f'<tr bgcolor="{bg}"><td valign="top" style="color:#333d4b;word-break:keep-all">{_name_html(company)}<br>{price_cells[company]}</td>'
                     f'{lead_fin}<td valign="top">{news}</td></tr>'

@@ -54,8 +54,24 @@ FP_BLOCK_RE = re.compile(r'<div style="margin:18px 0 6px"><b style="font-size:13
 QUIET_BLOCK_RE = re.compile(r'<div style="color:#6b7684;line-height:1.8;font-size:11px;margin-bottom:8px">📭 <b>최근 7일 뉴스 미확인.*?</div>', re.S)
 
 
+OLD_EXTRA_RE = re.compile(r'<div style="font-size:12px;color:#6b7684;margin:-6px 0 12px">5그룹 .*?</div>', re.S)
+CHIP_RE = re.compile(r'(<a [^>]*>)([^<]*)(</a>) <b style="color:#3182f6">([^<]*)</b>')
+GROUP_H3_RE = re.compile(r"<h3([^>]*)>(.*?)</h3>", re.S)
+
+
+def _group_nav(body: str) -> list:
+    """본문의 그룹 제목 → [(앵커 id, '1그룹')]"""
+    return [(f"g{i}", re.sub(r"<[^>]+>|\s*\(.*", "", t).strip()) for i, (_, t) in enumerate(GROUP_H3_RE.findall(body), 1)]
+
+
 def _clean_body(body: str) -> str:
     body = QUIET_BLOCK_RE.sub("", FP_BLOCK_RE.sub("", body))
+    body = OLD_EXTRA_RE.sub("", body)
+    # 제목에 이미 든 금액을 뒤에 한 번 더 붙인 칩은 뺀다
+    body = CHIP_RE.sub(lambda m: m.group(0) if m.group(4).strip() not in m.group(2) else m.group(1) + m.group(2) + m.group(3), body)
+    # 그룹 제목은 h2로 (h1 다음에 h3가 오면 제목 단계가 건너뛴다) + 이동용 앵커
+    counter = iter(range(1, 99))
+    body = GROUP_H3_RE.sub(lambda m: f'<h2 id="g{next(counter)}"{m.group(1)}>{m.group(2)}</h2>', body)
     body = EMOJI_RE.sub("", INNER_HEAD_RE.sub("", body, count=1))
     # 제목 색 안내를 이 사이트의 색(구리·검정·회색)에 맞게 바꾼다
     return LEGEND_RE.sub("제목 색: 구리색 24시간 이내 · 검정 최근 7일 · 회색 지난 소식(8~30일) · 지분 = ", body)
@@ -89,7 +105,7 @@ def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = 
   <footer class="foot">
     <div class="wrap">
       <p>기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지입니다. 기사의 저작권은 각 언론사에 있습니다.</p>
-      <p>매주 목요일 갱신</p>
+      <p>매주 목요일 갱신 · <a href="#content">↑ 맨 위로</a></p>
     </div>
   </footer>
   {script}
@@ -140,25 +156,45 @@ def _write_week_page(k: str, s: dict, body_html: str, prev_k, next_k) -> None:
         (f'<a href="{prev_k}.html" rel="prev">← 이전 주</a>' if prev_k else '<span>← 이전 주</span>')
         + (f'<a href="{next_k}.html" rel="next">다음 주 →</a>' if next_k else '<span>다음 주 →</span>')
     )
+    cleaned = _clean_body(body_html)
+    nav_items = _group_nav(body_html)
+    jump = "".join(f'<a href="#{i}">{escape(t)}</a>' for i, t in nav_items)
+    is_latest = next_k is None
+    title_txt = "이번 주 소식" if is_latest else f"{start.month}/{start.day}~{d.month}/{d.day} 소식"
+    extra = ""
+    if s.get("extra_total"):
+        extra = f' · 5그룹 {s["extra_total"]}곳 중 {s.get("extra_companies") or 0}곳 소식 확인'
     main = f"""
     <section class="hero">
       <p class="kicker">{d.year}년 {d.month}월 {d.day}일 {WEEKDAY[d.weekday()]}요일 발행 · {start.month}/{start.day} ~ {d.month}/{d.day}</p>
-      <h1>이번 주 소식 <em>{s['fresh_news']}</em>건</h1>
-      <p class="sub">공시 {s['fresh_dart']}건 포함 · 소식이 있는 회사 {s['fresh_companies']}곳 / {s['total']}곳</p>
+      <h1>{title_txt} <em>{s['fresh_news']}</em>건</h1>
+      <p class="sub">1~4그룹 {s['total']}곳 기준 · 공시 {s['fresh_dart']}건 포함 · 소식이 있는 회사 {s['fresh_companies']}곳{extra}</p>
     </section>
     <div class="tools">
       <label class="search"><span class="sr">이 주 소식 검색</span>
         <input id="q" type="search" placeholder="회사명·키워드로 찾기  (예: 심텍, 수주, 증설)" autocomplete="off"></label>
-      <nav class="pager" aria-label="주차 이동"><a href="../index.html">전체 주차</a>{pager}</nav>
+      <nav class="pager" aria-label="주차 이동">{pager}</nav>
+      <nav class="jump" aria-label="그룹 이동"><span>바로가기</span>{jump}</nav>
     </div>
-    <p class="none" id="none" hidden>찾는 내용이 이 주차에 없습니다.</p>
-    <div class="news-body">{_clean_body(body_html)}</div>"""
-    script = (
-        "<script>var q=document.getElementById('q'),n=document.getElementById('none');"
-        "q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),c=0;"
-        "document.querySelectorAll('.news-body table tr').forEach(function(r){if(r.querySelector('th'))return;"
-        "var ok=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.style.display=ok?'':'none';if(ok)c++;});n.hidden=!v||c>0;});</script>"
-    )
+    <p class="none" id="none" role="status" aria-live="polite" hidden></p>
+    <div class="news-body">{cleaned}</div>"""
+    script = """<script>
+var q=document.getElementById('q'),n=document.getElementById('none'),body=document.querySelector('.news-body');
+function run(){
+  var v=q.value.trim().toLowerCase(),c=0,rows=body.querySelectorAll('table tr');
+  rows.forEach(function(r){if(r.querySelector('th'))return;var ok=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.style.display=ok?'':'none';if(ok&&!r.querySelector('td[colspan]'))c++;});
+  // 결과가 없는 그룹은 제목·표 머리까지 숨기고, 검색 중에는 요약 블록도 접는다
+  body.querySelectorAll('h2').forEach(function(h){var t=h.nextElementSibling;while(t&&t.tagName!=='TABLE'&&t.tagName!=='H2')t=t.nextElementSibling;
+    var show=!v||(t&&t.tagName==='TABLE'&&Array.prototype.some.call(t.querySelectorAll('tr'),function(r){return !r.querySelector('th')&&r.style.display!=='none'}));
+    h.style.display=show?'':'none';if(t&&t.tagName==='TABLE')t.style.display=show?'':'none';});
+  Array.prototype.forEach.call(body.children,function(el){if(el.tagName!=='H2'&&el.tagName!=='TABLE'&&!el.matches('div[style*="font-size:11px"]'))el.style.display=v?'none':'';});
+  n.hidden=!v;n.textContent=v?(c?'\u201c'+q.value.trim()+'\u201d '+c+'\uacf3\uc5d0\uc11c \ucc3e\uc558\uc2b5\ub2c8\ub2e4.':'\u201c'+q.value.trim()+'\u201d\uac00 \uc774 \uc8fc\ucc28\uc5d0 \uc5c6\uc2b5\ub2c8\ub2e4. \ub2e4\ub978 \uc8fc\ucc28\ub3c4 \ucc3e\uc544\ubcf4\uc138\uc694.'):'';
+  try{history.replaceState(null,'',v?'#q='+encodeURIComponent(q.value.trim()):location.pathname)}catch(e){}
+}
+q.addEventListener('input',run);
+q.addEventListener('keydown',function(e){if(e.key==='Escape'){q.value='';run();}});
+var m=location.hash.match(/^#q=(.*)$/);if(m){q.value=decodeURIComponent(m[1]);run();}
+</script>"""
     (NEWS_DIR / f"{k}.html").write_text(
         _layout(prefix="../", title=f"{d:%m/%d} 주간 동향 · 소부장 주간 동향", main=main, script=script, nav='<a href="../index.html">전체 주차</a>'),
         encoding="utf-8",
@@ -212,7 +248,7 @@ def _write_index(meta: dict) -> None:
 
 NEWS_CSS = """/* 디자인 기준: DESIGN.md */
 @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-display:swap;src:local("Pretendard Variable"),url("vendor/pretendard/PretendardVariable.woff2") format("woff2-variations")}
-:root{--paper:#f6f4ee;--ink:#17191c;--sub:#5d6168;--dim:#8a8d92;--rule:#d8d3c6;--cu:#a8480f;--up:#d0342c;--down:#2a62c4}
+:root{--paper:#f6f4ee;--ink:#17191c;--sub:#5d6168;--dim:#6b6f76;--rule:#d8d3c6;--cu:#a8480f;--up:#d0342c;--down:#2a62c4}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 "Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-variant-numeric:tabular-nums;word-break:keep-all}
@@ -227,7 +263,7 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--cu);outline-offset:2
 .mast-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:14px;padding-bottom:12px}
 .mast-name{font-size:20px;font-weight:800;letter-spacing:-.02em;text-decoration:none}
 .mast-nav{display:flex;gap:18px;font-size:14px}
-.mast-nav a{text-decoration:none;color:var(--sub)}.mast-nav a:hover{color:var(--cu)}
+.mast-nav a{display:inline-block;padding:10px 0;text-decoration:none;color:var(--sub)}.mast-nav a:hover{color:var(--cu)}
 /* 머리말 */
 .kicker{margin:36px 0 8px;font-size:14px;font-weight:600;color:var(--cu);letter-spacing:.01em}
 h1{margin:0;font-size:clamp(34px,6vw,56px);line-height:1.12;font-weight:800;letter-spacing:-.035em}
@@ -247,7 +283,7 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 /* 지난 주차 */
 .toc{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:baseline;margin:26px 0 0;padding:10px 0;border-bottom:1px solid var(--rule);font-size:15px}
 .toc span{font-size:13px;color:var(--sub);margin-right:6px}
-.toc a{text-decoration:none;font-weight:600}
+.toc a{display:inline-block;padding:10px 4px;text-decoration:none;font-weight:600}
 .month{margin-top:30px}
 .month h2{margin:0;padding-bottom:8px;border-bottom:2px solid var(--ink);font-size:22px;font-weight:800;letter-spacing:-.02em}
 .rows{list-style:none;margin:0;padding:0}
@@ -263,23 +299,28 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 .count span{font-size:12px}
 /* 주차 페이지 */
 .hero{padding-bottom:6px}
-.tools{display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between;align-items:center;margin:22px 0 4px;padding:12px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.tools{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;margin:22px 0 4px;padding:10px 0 6px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.jump{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:0 4px;align-items:center;font-size:14px;font-weight:600}
+.jump span{font-size:12px;font-weight:400;color:var(--sub);margin-right:8px}
+.jump a{display:inline-block;padding:10px 8px;text-decoration:none}.jump a:hover{color:var(--cu)}
 .search{flex:1 1 280px;max-width:440px}
 .search input{width:100%;height:44px;padding:0 12px;border:1px solid #9b9686;border-radius:0;background:#fff;font:inherit;font-size:16px;color:var(--ink)}
 .pager{display:flex;gap:18px;font-size:14px;font-weight:600}
-.pager a{text-decoration:none}.pager a:hover{color:var(--cu)}.pager span{color:var(--dim)}
-.none{margin:20px 0;color:var(--sub)}
+.pager a,.pager span{display:inline-block;padding:11px 0}.pager a{text-decoration:none}.pager a:hover{color:var(--cu)}.pager span{color:var(--dim)}
+.none{margin:14px 0;color:var(--sub)}
+html{scroll-padding-top:120px}
 /* 본문(뉴스레터 HTML 재서식: 인라인 서식을 이 사이트 기준으로 덮어쓴다) */
 .news-body{margin-top:8px;font-size:15px;max-width:none!important}
 .news-body *{font-family:inherit!important}
 .news-body div[style*="max-width:1000px"]{max-width:none!important}
 .news-body div[style*="border-radius:8px"]{border:0!important;border-top:2px solid var(--ink)!important;border-radius:0!important;background:transparent!important;padding:14px 0 6px!important;margin:18px 0 6px!important}
 .news-body div[style*="font-weight:bold"]{font-size:14px!important;color:var(--cu);letter-spacing:.02em}
-.news-body h3{border:0!important;border-top:2px solid var(--ink)!important;padding:12px 0 0!important;margin:34px 0 4px!important;font-size:21px!important;font-weight:800!important;letter-spacing:-.02em}
+.news-body h2{border:0!important;border-top:2px solid var(--ink)!important;padding:12px 0 0!important;margin:34px 0 4px!important;font-size:21px!important;font-weight:800!important;letter-spacing:-.02em}
 .news-body table{border:0!important;border-collapse:collapse!important;width:100%;margin-bottom:8px!important}
 .news-body th,.news-body td{border:0!important;border-top:1px solid var(--rule)!important;padding:12px 10px 12px 0!important;vertical-align:top;background:transparent!important}
 .news-body tr{background:transparent!important}
 .news-body th{font-size:12px!important;font-weight:600!important;color:var(--sub);text-align:left!important;letter-spacing:.02em;border-top:1px solid var(--ink)!important;padding:8px 10px 8px 0!important}
+.news-body td{line-height:1.7}
 .news-body td:first-child{width:19%;min-width:110px}
 .news-body td b{font-weight:700}
 .news-body td[colspan]{color:var(--sub)!important}
@@ -287,13 +328,22 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
 .news-body a[style*="#3182f6"]{color:var(--ink)!important}
 .news-body a[style*="#8b95a1"]{color:var(--dim)!important}
 .news-body a{text-decoration:underline!important;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:#c9c3b4}
-.news-body span[style*="background:#f2f4f6"]{background:transparent!important;color:var(--sub)!important;padding:0!important;margin-right:4px;font-size:11px!important;font-weight:600;letter-spacing:.02em;border-left:2px solid var(--cu);padding-left:6px!important}
+.news-body span[style*="background:#f2f4f6"]{background:transparent!important;color:var(--sub)!important;padding:0!important;margin-right:4px;font-size:11px!important;font-weight:600;letter-spacing:.02em;border-left:2px solid #9b9686;padding-left:6px!important}
 .news-body span[style*="background:#e8f3ff"]{background:transparent!important;border:0!important;color:var(--sub)!important;font-weight:600;padding:0!important;border-left:2px solid var(--ink)!important;padding-left:6px!important}
-.news-body [style*="color:#8b95a1"],.news-body [style*="color:#6b7684"]{color:var(--sub)!important}
+.news-body [style*="color:#8b95a1"],.news-body [style*="color:#6b7684"],.news-body [style*="color:#b0b8c1"]{color:var(--sub)!important}
+.news-body font[color="#8b95a1"]{color:var(--sub)!important}
+.news-body font[color="#4e5968"]{color:var(--sub)!important}
+.news-body [style*="font-size:10px"],.news-body [style*="font-size:11px"],.news-body font[size="1"]{font-size:12px!important}
 .news-body font[color="#f04452"],.news-body span[style*="color:#f04452"]{color:var(--up)!important}
 .news-body font[color="#3182f6"],.news-body span[style*="color:#3182f6"]{color:var(--down)!important}
 .news-body b[style*="color:#f04452"],.news-body b[style*="color:#3182f6"]{color:var(--ink)!important}
-.news-body div[style*="margin:0 0 7px"] span[style*="font-size:11px"]{white-space:nowrap}
+.news-body div[style*="margin:0 0 7px"] span[style*="font-size:12px"]{white-space:nowrap}
+/* 1~4그룹 회사 칸: 종가·등락을 한 줄로 이어 쓰고, 관련기사 줄은 접는다 */
+.news-body td:first-child div[style*="font-size"] br{display:none}
+.news-body td:first-child div[style*="font-size"] span{margin-left:6px}
+.news-body td:first-child a{display:inline-block;padding:4px 0}
+.news-body span:has(>a[style*="color:#6b7684"]){display:none}
+.news-body td a{padding:2px 0}
 /* 바닥글 */
 .foot{margin-top:56px;border-top:1px solid var(--ink);padding:18px 0 40px;font-size:13px;color:var(--sub)}
 .foot p{margin:0 0 4px}
@@ -311,5 +361,8 @@ h1 a{text-decoration:none}h1 a:hover{color:inherit}
   .news-body td:first-child{width:27%;min-width:84px}
   .news-body th,.news-body td{padding:10px 8px 10px 0!important}
   .pager{width:100%;justify-content:space-between}
+  .news-body td:nth-child(3){max-width:92px;overflow-wrap:anywhere}
+  .news-body td:nth-child(4){max-width:64px;overflow-wrap:anywhere}
+  .news-body th:nth-child(n+3){width:auto!important}
 }
 """

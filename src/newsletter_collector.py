@@ -44,7 +44,7 @@ BROKER_RE = re.compile(
     r"(한국투자|nh투자|kb증권|삼성증권|미래에셋|대신증권|키움증권|신한투자|하나증권|메리츠증권|유안타|리서치센터|목표주가|투자의견|상승 마감|하락 마감|주가\s*전망|주가\s*추이|주가)"
 )
 ENGLISH_STOCK_RE = re.compile(
-    r"(stock|shares|nasdaq|nyse|tse:|price target|buy rating|sell rating|hold rating|downgrade|upgrade|analyst|earnings per share|\beps\b|dividend|market cap|short interest|hedge fund|institutional invest|results beat|p/e ratio|valuation|trading at|52-week|moving average|zacks|motley fool|seeking alpha|why .* stock|should you buy|undervalued|overvalued|fair value|intrinsic value|narrative\?|investors|initiated at|initiates|reiterat|outperform|underperform|overweight|underweight|rating|margin trading|earnings preview|wall street|better buy|\bvs\.?\s|\betf\b|research reports?|market is going to|market size|cagr|(?:loses|gains|rises|falls|drops|jumps|climbs|slides)\s+\d+(?:\.\d+)?\s*(?:percent|%)|pre-?market|after-hours)"
+    r"(stock|shares|nasdaq|nyse|tse:|price target|buy rating|sell rating|hold rating|downgrade|upgrade|analyst|earnings per share|\beps\b|dividend|market cap|short interest|hedge fund|institutional invest|results beat|p/e ratio|valuation|trading at|52-week|moving average|zacks|motley fool|seeking alpha|why .* stock|should you buy|undervalued|overvalued|fair value|intrinsic value|narrative\?|investors|initiated at|initiates|reiterat|outperform|underperform|overweight|underweight|rating|margin trading|earnings preview|wall street|better buy|\bvs\.?\s|\betf\b|research reports?|market is going to|market size|cagr|(?:loses|gains|rises|falls|drops|jumps|climbs|slides)\s+\d+(?:\.\d+)?\s*(?:percent|%)|pre-?market|after-hours|lobbying|lobbyist)"
 )
 
 # 회사별 오탐 필터 (제목을 소문자로 바꾼 뒤 검사)
