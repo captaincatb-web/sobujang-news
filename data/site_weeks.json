@@ -1114,29 +1114,29 @@
   "total": 73
  },
  "2026-10-29": {
-  "extra_companies": 41,
+  "extra_companies": 38,
   "extra_total": 249,
-  "fresh_companies": 30,
-  "fresh_dart": 12,
-  "fresh_news": 91,
+  "fresh_companies": 35,
+  "fresh_dart": 19,
+  "fresh_news": 84,
   "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "http://www.bizwnews.com/news/articleView.html?idxno=150100",
+    "title": "이상일 용인시장, ASML·ST 방문…유럽 반도체 협력 모색"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "하나머티리얼즈",
+    "link": "https://n.news.naver.com/article/030/0003478953?sid=101",
+    "title": "디와이피엔에프, 하나머티리얼즈와 약 480억원 규모 실리콘 음극재 양산공장 EPC 계약 체결"
+   },
    {
     "cat": "수주·협력",
     "company": "한솔아이원스",
     "link": "https://n.news.naver.com/article/057/0001975134?sid=004",
     "title": "충청북도, 한솔아이원스와 1560억 원 규모 투자협약"
-   },
-   {
-    "cat": "투자·증설",
-    "company": "피에스케이",
-    "link": "https://newsyonhap.com/news/132936",
-    "title": "피에스케이, 용인 캠퍼스에 1800억원 투자 결정"
-   },
-   {
-    "cat": "기술·제품",
-    "company": "신성이엔지",
-    "link": "https://www.hvacrj.co.kr/news/articleView.html?idxno=31371",
-    "title": "신성이엔지, ‘데이터센터코리아 2026’서 AI 데이터센터 통합 솔루션 선보인다"
    }
   ],
   "total": 73
