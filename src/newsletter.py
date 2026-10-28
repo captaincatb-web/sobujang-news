@@ -10,12 +10,16 @@ from src.newsletter_ai import apply_ai_analysis
 from src.newsletter_collector import BLOCKED_LINK_RE, FALSE_POSITIVE_CASES, collect_articles, group_similar, is_stale
 from src.newsletter_config import LEGACY_COMPANIES, OUTPUT_DIR, TARGET_GROUPS, all_company_names
 from src.newsletter_finance import Cache, build_fin_summary, build_price_cell, build_price_short, weekly_movers
-from src.newsletter_html import build_newsletter_html
+from src.newsletter_html import build_newsletter_html, lead_phrases
 from src.newsletter_rank import FRESH_DAYS, age_days, candidate_articles, is_routine, pick_highlights, select_company
 
 
-def build_subject(now: datetime) -> str:
-    return f"📬 [뉴스레터] 핵심 소부장 파트너사 주간 동향 ({now.month}/{now.day})"
+def build_subject(now: datetime, highlights=()) -> str:
+    """'[소부장 주간] 대덕전자 6150억 투자' — 이번 주 가장 큰 금액이 제목에 든 소식 한 가지. 없으면 날짜만."""
+    phrases = lead_phrases(list(highlights), 1)
+    if phrases:
+        return f"[소부장 주간] {phrases[0]}"[:40]
+    return f"[소부장 주간] 협력사 주간 동향 ({now.month}/{now.day})"
 
 
 def main() -> None:
@@ -61,7 +65,7 @@ def main() -> None:
         price_short=price_short,
         show_fin=bool(dart_key),
     )
-    subject = build_subject(now)
+    subject = build_subject(now, highlights)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / "newsletter.html"
     out_path.write_text(html_body, encoding="utf-8")

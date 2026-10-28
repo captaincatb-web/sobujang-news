@@ -107,6 +107,88 @@ def _header(now: datetime, stats: dict) -> str:
     )
 
 
+BIG_AMOUNT_RE = re.compile(r"\d[\d,.]*\s*(?:조|억)(?:\s*\d[\d,.]*\s*만)?\s*(?:원|달러|엔)?")
+VERB_RULES = (("투자협약", "투자협약"), ("협약", "협약"), ("MOU", "MOU"), ("계약", "계약"), ("인수", "인수"), ("투자", "투자"), ("수주", "수주"), ("증설", "증설"), ("공급", "공급"))
+
+
+def headline_phrase(company: str, article: dict) -> str:
+    """'대덕전자 6150억 투자'처럼 제목에 실제로 있는 금액·행위만으로 만든 짧은 문구 (금액이 없으면 빈 문자열).
+    분류가 아닌 제목 속 낱말을 써서 사실과 다른 표현이 들어가지 않게 한다."""
+    m = BIG_AMOUNT_RE.search(article["title"])
+    if not m:
+        return ""
+    amount = re.sub(r"(?<=[억조])원$", "", re.sub(r"\s+", "", m.group(0)))  # '6150억원'→'6150억', '56억7566만원'은 그대로
+    verb = next((v for key, v in VERB_RULES if key in article["title"]), "")
+    return " ".join(x for x in (get_display_name(company), amount, verb) if x)
+
+
+def lead_phrases(highlights: list, n: int = 3) -> list:
+    out, seen = [], set()
+    for company, a in highlights:
+        phrase = headline_phrase(company, a)
+        if phrase and phrase not in seen:
+            seen.add(phrase)
+            out.append(phrase)
+        if len(out) >= n:
+            break
+    return out
+
+
+def _lead_line(highlights: list) -> str:
+    phrases = lead_phrases(highlights)
+    if not phrases:
+        return ""
+    return (
+        '<div style="margin:0 0 6px;font-size:14px"><b>이번 주 핵심</b> · '
+        + " · ".join(escape(p) for p in phrases)
+        + f' <span style="{META}">(아래 주요 소식 참고)</span></div>'
+        f'<div style="margin:0 0 12px;font-size:13px">👉 <a href="{SITE_URL}" style="color:#3182f6"><b>전체 주차·검색 보기</b></a>'
+        f' <span style="{META}">내 거래처를 이름으로 바로 찾을 수 있습니다</span></div>'
+    )
+
+
+def _check_items(selections: dict, now: datetime, limit: int = 8) -> list:
+    """이번 주 새 공시(지분·소유 변동 제외) → 확인이 필요한 항목"""
+    seen, items = set(), []
+    for company, sel in selections.items():
+        for a in sel["shown"] + [m for x in sel["shown"] for m in x["similar_articles"]]:
+            if a["cat3"] != "공시자료" or a["cat2"] == "지분변동" or age_days(now, a) > FRESH_DAYS or a["link"] in seen:
+                continue
+            seen.add(a["link"])
+            items.append((a["pub_date"], company, a))
+    items.sort(key=lambda x: x[0], reverse=True)
+    return items[:limit], max(len(items) - limit, 0)
+
+
+def _checklist(selections: dict, now: datetime, movers: tuple) -> str:
+    """'먼저 확인할 것': 새 공시와 1주 주가 변동을 맨 위에 모은다 (사실만, 원인·전망은 쓰지 않는다)"""
+    items, more = _check_items(selections, now)
+    gainers, losers = movers
+    if not items and not gainers and not losers:
+        return ""
+    rows = []
+    for _, company, a in items:
+        title = a["title"].split(" - ", 1)[1] if " - " in a["title"] else a["title"]
+        note = " · 정정 내용은 공시 원문 확인" if "정정" in a["title"] else (" · 기준일은 공시 원문 확인" if "기준일" in a["title"] else "")
+        rows.append(
+            f'<div style="margin:0 0 4px">{_badge(a)} <b>{get_display_name(company)}</b> · '
+            f'<a href="{escape(a["link"])}" style="color:#191f28;text-decoration:none">{escape(title)}</a> '
+            f'<span style="{META}">DART · {a["date_str"]}{note}</span></div>'
+        )
+    if more:
+        rows.append(f'<div style="{META}">그 밖의 공시 {more}건은 웹페이지에서 확인하세요.</div>')
+    body = "".join(rows)
+    if body:
+        body = f'<div style="{META};margin:0 0 4px">공시 (이번 주)</div>' + body
+    return (
+        '<div style="border:1px solid #f0b9bd;border-radius:8px;padding:12px 14px;margin:0 0 12px;background:#fffafa">'
+        '<div style="font-weight:bold;font-size:14px;margin-bottom:8px">📌 먼저 확인할 것</div>'
+        + body
+        + (f'<div style="{META};margin:8px 0 4px">1주 주가 변동 (사실만 표기, 원인은 원문 확인 필요)</div>' + _movers(gainers, losers) if gainers or losers else "")
+        + "</div>"
+    )
+
+
 def _highlights(highlights: list) -> str:
     if not highlights:
         return ""
@@ -234,8 +316,9 @@ def _build_html(
     hl_links = {a["link"] for _, a in highlights}
     out = ['<div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:1000px;color:#191f28">']
     out.append(_header(now, stats))
+    out.append(_lead_line(highlights))
+    out.append(_checklist(selections, now, movers))
     out.append(_highlights(highlights))
-    out.append(_movers(*movers))
     out.append(
         f'<div style="{META};margin-bottom:4px">제목 색: <b style="color:#f04452">빨강</b> 24시간 이내 · '
         '<b style="color:#3182f6">파랑</b> 최근 7일 · <b style="color:#8b95a1">회색</b> 지난 소식(8~30일) · <span style="white-space:nowrap">📄지분 = 지분·소유 변동 공시 건수</span></div>'
