@@ -59,6 +59,8 @@ def select_company(articles: list, now: datetime) -> dict:
     main = sorted((a for a in fresh if not is_routine(a)), key=lambda a: score(a, now), reverse=True)
     routine = [a for a in fresh if is_routine(a)]
     shown, low = [], 0
+    if any(a["cat2"] not in LOW_VALUE_CATEGORIES for a in main):
+        main = [a for a in main if a["cat2"] not in LOW_VALUE_CATEGORIES]  # 행사·기부 소식은 더 중요한 소식이 없을 때만
     for a in main:
         if a["cat2"] in LOW_VALUE_CATEGORIES:
             if low >= 1:

@@ -31,7 +31,7 @@ def main() -> None:
     grouped = group_similar(collect_articles())
     resolve_links(grouped, now)
     apply_ai_analysis(grouped, now)
-    selections = {company: select_company(articles, now) for company, articles in grouped.items()}
+    selections = finalize_links(grouped, now)
     highlights = pick_highlights(selections, now)
 
     cache = Cache()
@@ -111,6 +111,27 @@ def build_stats(grouped: dict, now: datetime, total_companies: int, names=None) 
         "fresh_companies": sum(1 for arts in fresh.values() if any(not is_routine(a) for a in arts)),
         "total_companies": total_companies,
     }
+
+
+def finalize_links(grouped: dict, now: datetime) -> dict:
+    """회사별 표시 기사를 고른 뒤, 그중 원문 링크로 바뀌지 않은 구글 링크를 다시 변환한다.
+    끝내 원문을 못 찾거나 원문 주소로 보아 옛 기사이면 빼고 다시 고른다 (최대 3회)."""
+    for _ in range(3):
+        selections = {c: select_company(a, now) for c, a in grouped.items()}
+        pending = [a for sel in selections.values() for a in sel["shown"] + ([sel["older"]] if sel["older"] else []) if "news.google.com" in a["link"]]
+        if not pending:
+            return selections
+        mapping = gnews_decoder.decode_all(a["link"] for a in pending)
+        drop = set()
+        for a in pending:
+            new = mapping.get(a["link"], a["link"])
+            if new == a["link"] or BLOCKED_LINK_RE.search(new) or is_stale(a["title"], new, now):
+                drop.add(id(a))
+            else:
+                a["link"] = new
+        for c in grouped:
+            grouped[c] = [a for a in grouped[c] if id(a) not in drop]
+    return {c: select_company(a, now) for c, a in grouped.items()}
 
 
 def resolve_links(grouped: dict, now: datetime) -> None:

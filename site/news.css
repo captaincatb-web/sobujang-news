@@ -102,6 +102,43 @@ html{scroll-padding-top:120px}
 .news-body td:first-child a{display:inline-block;padding:4px 0}
 .news-body span:has(>a[style*="color:#6b7684"]){display:none}
 .news-body td a{padding:2px 0}
+/* 대시보드 */
+.dash-filters{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center;margin:22px 0 0;padding:10px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.dash-filters select{height:44px;padding:0 10px;border:1px solid #9b9686;border-radius:0;background:#fff;font:inherit;font-size:15px;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;min-height:4px}
+.chip{border:1px solid var(--ink);background:var(--ink);color:#fff;font:inherit;font-size:14px;padding:6px 10px;cursor:pointer}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:22px 0 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.kpi{padding:14px 16px 14px 0;display:flex;flex-direction:column;gap:2px}
+.kpi+.kpi{padding-left:16px;border-left:1px solid var(--rule)}
+.kpi-l{font-size:13px;color:var(--sub)}
+.kpi b{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.kpi-wide b{font-size:24px;line-height:1.35}
+.kpi-u{font-size:13px;color:var(--sub)}
+.panel{margin-top:34px}
+.panel h2{margin:0;padding-bottom:8px;border-bottom:2px solid var(--ink);font-size:20px;font-weight:800;letter-spacing:-.02em}
+.panel-sub{font-size:13px;font-weight:400;color:var(--sub);letter-spacing:0;margin:8px 0 0}
+.panel-row{display:grid;grid-template-columns:1fr 1fr;gap:0 36px}
+.chart{margin-top:12px;width:100%;overflow:hidden}
+.chart svg{display:block}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.chart .ax{font-size:12px;fill:var(--sub)}
+.chart .bar{fill:var(--cu)}
+.chart .bar.on{fill:var(--ink)}
+.chart .hit{cursor:pointer}.chart .hit:hover .bar{fill:#7f350b}
+.hbars{margin-top:8px}
+.hb{display:grid;grid-template-columns:minmax(84px,30%) 1fr 44px;gap:10px;align-items:center;width:100%;min-height:36px;padding:4px 0;border:0;border-bottom:1px solid var(--rule);background:transparent;font:inherit;font-size:15px;color:var(--ink);text-align:left;cursor:pointer}
+.hb:hover .hb-b{background:#7f350b}
+.hb.on{font-weight:700}.hb.on .hb-b{background:var(--ink)}
+.hb-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hb-t{height:10px;background:transparent}
+.hb-b{display:block;height:10px;background:var(--cu);border-radius:0 4px 4px 0;min-width:2px}
+.hb-v{text-align:right;font-weight:600}
+.hb:focus-visible,.chip:focus-visible,.dash-filters select:focus-visible{outline:2px solid var(--cu);outline-offset:2px}
+.list{width:100%;border-collapse:collapse;margin-top:6px;font-size:15px}
+.list th{text-align:left;font-size:12px;font-weight:600;color:var(--sub);padding:8px 10px 8px 0;border-bottom:1px solid var(--ink)}
+.list td{padding:10px 10px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top;line-height:1.55}
+.list .nw{white-space:nowrap}.list .cat,.list .src{font-size:13px;color:var(--sub)}
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.45;padding:6px 9px}
 /* 바닥글 */
 .foot{margin-top:56px;border-top:1px solid var(--ink);padding:18px 0 40px;font-size:13px;color:var(--sub)}
 .foot p{margin:0 0 4px}
@@ -119,6 +156,16 @@ html{scroll-padding-top:120px}
   .news-body td:first-child{width:27%;min-width:84px}
   .news-body th,.news-body td{padding:10px 8px 10px 0!important}
   .pager{width:100%;justify-content:space-between}
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi:nth-child(3){padding-left:0;border-left:0}
+  .kpi:nth-child(n+3){border-top:1px solid var(--rule)}
+  .panel-row{grid-template-columns:1fr}
+  .list th:nth-child(5),.list td:nth-child(5),.list th:nth-child(3),.list td:nth-child(3){display:none}
+  .dash-filters select{flex:1 1 40%}
+  .list{table-layout:fixed}
+  .list td{overflow-wrap:anywhere}
+  .list th:nth-child(1),.list td:nth-child(1){width:46px}
+  .list th:nth-child(2),.list td:nth-child(2){width:30%;white-space:normal}
   .news-body td:nth-child(3){max-width:92px;overflow-wrap:anywhere}
   .news-body td:nth-child(4){max-width:64px;overflow-wrap:anywhere}
   .news-body th:nth-child(n+3){width:auto!important}

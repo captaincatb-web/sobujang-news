@@ -39,6 +39,10 @@ PHOTO_TAG_RE = re.compile(r"^\s*[\(\[〈]\s*포토\s*[\)\]〉]")
 STOCK_NOISE_RE = re.compile(
     r"(특징주|테마주|수혜주|관련주|주도주|대장주|고래사냥|내일장|주식민원|투자전략|테마\s*상승|투자분석|주달|52주|신고가|신저가|외국인\s*대량|순매도|순매수|코스닥|코스피|급등|급락|상한가|하한가|증시일정|리포트|총정리|상승여력|목표가|올릴\s*종목|폭등|반도체주|장비주|동반\s*상승|동반\s*폭등|주목을|방긋|초고수|사고.*팔았다|질주|가격\s*부담|상쇄|자신감|헬로스톡|주목할\s*종목|싸다|증권|실적\s*감안|기대감도|차익실현|매수\s*추천|칩칩폭폭|딸깍|전량매도|전량매수|매수일지|투자일지|매매일기|매매복기|추천부터|손절|존버|물타기|줍줍|영끌|풀매수|풀매도|시선강탈|공략법|불타오르네|%\s*[↑↓]|장중|현재가|원선에서|만원대\s*(상승|하락)|%\s*(올라|뛰어|내려|빠져|하락에)|기술적\s*분석|지지선|저항선|움직였습니다|주식\s*\d선|기판주|소재주|부품주|장비주|강세|약세|최선호주|선호주|탑픽|애널리스트|투자\s*포인트|저평가|고평가|증시|투자\s*캘린더|프리뷰|체크포인트|월가|株|재주목|애프터마켓|프리마켓|상승폭|하락폭|장\s*마감|마감\s*시황|매수세|매도세|주요\s*공시|경제\s*일정|주간\s*일정|(?:상승|하락)\s*vi\b|\d+만\s*\d*\s*원(?:대|으로|에|선|[…·,])|etf|골라\s*담|%\s*대\s*(?:상승|하락|강세|약세)|가격\s*내역|과거\s*데이터|tokenized|xstock|마감\s*분석|기업\s*주식\s*정보|원\s*마감(?!재))"
 )
+# 부호 없이 쓴 등락률('6.49% 하락'), 보합·거래량·투자주의 같은 시황 표현
+MARKET_MOVE_RE = re.compile(
+    r"\d+(?:\.\d+)?\s*%\s*(?:하락|상승|조정|반등|떨어|올라|뛰|내려|빠지|줄어|감소|증가)|약보합|강보합|보합세|보합권|거래량|거래대금|투자\s*(?:주의|경고|위험)\s*종목|종목은\?|명예의\s*전당|매도\s*(?:촉발|폭탄|행렬)|반토막|\d+배\s*뛴|earnings report|what to expect|stock (?:price|forecast)"
+)
 STOCK_BRACKET_RE = re.compile(r"\[.*(강세|약세|특징|종목|테마|토픽|시황|고래|주식|베스트).*\].*")
 BROKER_RE = re.compile(
     r"(한국투자|nh투자|kb증권|삼성증권|미래에셋|대신증권|키움증권|신한투자|하나증권|메리츠증권|유안타|리서치센터|목표주가|투자의견|상승 마감|하락 마감|주가\s*전망|주가\s*추이|주가)"
@@ -51,16 +55,16 @@ ENGLISH_STOCK_RE = re.compile(
 FALSE_POSITIVE_PATTERNS = {
     "머크퍼포먼스머티리얼즈": r"제약|의약|신약|임상|바이오|치료제",
     "와이씨": r"예측|가상자산|블록체인|스타트업|달바|성과보수",
-    "프로텍": r"코리아프로텍|화장품|뷰티|쿠션|선크림|케이스|보호필름|아이폰|갤럭시|프로텍트|protect|사이버작전|프로텍션|프로텍터|아세아프로텍|시큐어|코나아이|카드|버노바|아카데미|요하네스버그|남아공|수료",
+    "프로텍": r"세아프로텍|프로텍티브|코리아프로텍|화장품|뷰티|쿠션|선크림|케이스|보호필름|아이폰|갤럭시|프로텍트|protect|사이버작전|프로텍션|프로텍터|아세아프로텍|시큐어|코나아이|카드|버노바|아카데미|요하네스버그|남아공|수료",
     "AP시스템": r"중국|거버넌스\s*강화|esg\s*보고서|우드맥킨지|woodmac|태양광|인버터|solar|inverter",
     "유진테크": r"유진테크놀로지",
     "에스티아이": r"여론조사|지지|응답|복당|대통령|정당|찬성|반대|국힘|민주당|후보",
-    "테스": r"테스터|미용|의료기기|강소기업|바이오|두산테스나|비공개|베타|스트레스|게임|nasa|나사|망원경|테스\W*형|필라테스|요가|골대체재|드퓨신테스|시지바이오|노보시스|테스토닉|사이테스|cites|야생동물|멸종위기|파충류|희귀동물|밀수|밀매|테스티파이|테스토스|테스코|t\.e\.s\.s|아크리테스|테스라|넥슨|마비노기|테스트|신테스|tplo|정형외과|동물병원|수의|cbt|obt|biff|영화|배우|감독|바르텔레미|드라마|테스나",
+    "테스": r"테스티노|테스터|미용|의료기기|강소기업|바이오|두산테스나|비공개|베타|스트레스|게임|nasa|나사|망원경|테스\W*형|필라테스|요가|골대체재|드퓨신테스|시지바이오|노보시스|테스토닉|사이테스|cites|야생동물|멸종위기|파충류|희귀동물|밀수|밀매|테스티파이|테스토스|테스코|t\.e\.s\.s|아크리테스|테스라|넥슨|마비노기|테스트|신테스|tplo|정형외과|동물병원|수의|cbt|obt|biff|영화|배우|감독|바르텔레미|드라마|테스나",
     "후성": r"후성유전|유전체|유전학|유전 편집|에피크리스퍼|심포지엄",
-    "제이티": r"걸그룹|아이돌|데뷔|엔터|제이티\s*코리아|저축은행|캐피탈|jtbc|제이티비씨|jt방송|jt비씨|제이티시스템|제이티넷|제이티이엔지|제이티전자",
+    "제이티": r"제이티에코|걸그룹|아이돌|데뷔|엔터|제이티\s*코리아|저축은행|캐피탈|jtbc|제이티비씨|jt방송|jt비씨|제이티시스템|제이티넷|제이티이엔지|제이티전자",
     "ASML": r"니콘|캐논|재도전장|도전장|장악한",
     "케이씨": r"kc\s*인증|kc\s*마크|[가-힣]케이씨|케이씨지|kcg|케이씨씨|kcc|케이씨에스|케이씨티|선박|방식|방오|조선|^pkc|\bpkc\b|케이씨피드|hkc|케이씨텍|제이케이씨|케이씨(?:산업|모터스|엠씨|컴퍼니|삼호|글라스|인더스트리얼|파워|안전기술|코트렐|피\b|그룹)|kc\s*(?:그린|인더스트리얼|글라스|산업|모터스)|엔베스터|트루블루|아스트라|영실업|미래엔|조선\s*기자재|조선\s*부품",
-    "디아이": r"어드밴텍|advantech|디아이에프엠|difm|디아이동일|디아이씨|adi|아나로그디바이스|sdi|배터리|holding|asml|디바인|divine|변동 원인|주식 마감|nvidia|슈퍼마이크로|3di|도쿄일렉트론|디아이랩|디아이파워|디아이건설|엑스디아이",
+    "디아이": r"디아이홀딩스|디아이텍|디아이지|어드밴텍|advantech|디아이에프엠|difm|디아이동일|디아이씨|adi|아나로그디바이스|sdi|배터리|holding|asml|디바인|divine|변동 원인|주식 마감|nvidia|슈퍼마이크로|3di|도쿄일렉트론|디아이랩|디아이파워|디아이건설|엑스디아이",
     "솔브레인": r"솔브레인홀딩스|홀딩스",
     "피에스케이": r"피에스케이홀딩스|홀딩스",
     "티에스이": r"엘디티",
@@ -68,6 +72,9 @@ FALSE_POSITIVE_PATTERNS = {
     "에바라": r"jitsugyo|에바라실업",
     "교세라": r"교세라\s*돔|돔서|르세라핌|콘서트|공연|팬미팅|월드\s*투어|내한|걸그룹|아이돌|오릭스|한신|야구|야마가타",
     "교세라한국": r"교세라\s*돔|돔서|르세라핌|콘서트|공연|팬미팅|월드\s*투어|내한|걸그룹|아이돌|오릭스|한신|야구",
+    "에프에스티": r"에프에스티코리아|제네텍|보안|cctv",
+    "동우화인켐": r"옛\s*동우화인켐|부지",
+    "텔레트론": r"가든그로브|지점|teletron|라디오",
     "KLA": r"코소보|kosovo|해방군|liberation army|전쟁\s*범죄|헤이그",
 }
 FALSE_POSITIVE_RE = {k: re.compile(v) for k, v in FALSE_POSITIVE_PATTERNS.items()}
@@ -82,7 +89,7 @@ BLOCKED_SOURCE_RE = re.compile(
     re.I,
 )
 # 사진/이미지 페이지, 주가 분석 사이트
-BLOCKED_LINK_RE = re.compile(r"view_photo|image_popup|/photo/|simplywall\.st|tradersunion\.com|tradingkey\.com|calgaryroughnecks\.com")
+BLOCKED_LINK_RE = re.compile(r"job-post\.co\.kr|view_photo|image_popup|/photo/|simplywall\.st|tradersunion\.com|tradingkey\.com|calgaryroughnecks\.com")
 
 
 def build_alias_map() -> dict:
@@ -115,7 +122,7 @@ def is_stock_or_analysis_news(clean_title: str) -> bool:
         return True
     if re.search(r"[+\-]\d+\.?\d*\s*%", t):
         return True
-    return bool(STOCK_NOISE_RE.search(t) or STOCK_BRACKET_RE.search(t) or BROKER_RE.search(t))
+    return bool(STOCK_NOISE_RE.search(t) or STOCK_BRACKET_RE.search(t) or BROKER_RE.search(t) or MARKET_MOVE_RE.search(t))
 
 
 def is_english_stock_news(clean_title: str) -> bool:
@@ -174,14 +181,9 @@ def is_photo_caption(title: str) -> bool:
     )
 
 
-def find_companies(clean_title: str, alias_map: dict) -> list:
-    lower = clean_title.lower()
-    if "skc" in lower or "에스케이씨" in lower:
-        return []
-    if "와이씨켐" in lower or "ycchem" in lower or "yc chem" in lower:
-        return []
-
-    spans = []  # (시작, 끝, 회사)
+def _company_spans(lower: str, alias_map: dict) -> list:
+    """제목 속 회사명 위치 [(시작, 끝, 회사)] — 더 긴 다른 회사명 안에 든 이름은 뺀다"""
+    spans = []
     for alias in sorted(alias_map, key=len, reverse=True):
         if ASCII_ALIAS_RE.match(alias):
             # 순수 영문/숫자 alias는 단어 경계 매칭 (예: "di"가 "nvidia"에 걸리는 오탐 차단)
@@ -194,15 +196,37 @@ def find_companies(clean_title: str, alias_map: dict) -> list:
         for m in re.finditer(pattern, lower):
             spans.append((m.start(), m.end(), alias_map[alias]))
     # 더 긴 다른 회사명 안에 든 이름은 제외 (예: '디아이텍' 안의 '디아이', '피에스케이홀딩스' 안의 '피에스케이')
-    matched = {}
-    for start, end, company in spans:
-        inside_longer = any(
-            o_company != company and o_start <= start and end <= o_end and (o_end - o_start) > (end - start)
-            for o_start, o_end, o_company in spans
-        )
-        if not inside_longer:
-            matched[company] = True
-    return list(matched)
+    return [
+        (st, en, co) for st, en, co in spans
+        if not any(oc != co and os_ <= st and en <= oe and (oe - os_) > (en - st) for os_, oe, oc in spans)
+    ]
+
+
+LEAD_RE = re.compile(r"^(?:\s*\[[^\]]*\]|\s*\([^)]*\)|\s*<[^>]*>)*\s*")
+
+
+def find_companies(clean_title: str, alias_map: dict) -> list:
+    lower = clean_title.lower()
+    if "skc" in lower or "에스케이씨" in lower:
+        return []
+    if "와이씨켐" in lower or "ycchem" in lower or "yc chem" in lower:
+        return []
+    spans = _company_spans(lower, alias_map)
+    matched = list(dict.fromkeys(co for _, _, co in sorted(spans)))
+    # 제목이 'A사, …'처럼 협력사 이름으로 시작하면 그 회사(·로 이어진 회사까지)의 소식으로 본다
+    # (예: "하나머티리얼즈, ‘TEL, Lam…’ 장비 출하 확대"는 TEL 칸에 넣지 않는다)
+    pos = LEAD_RE.match(lower).end()
+    subject = []
+    while True:
+        hit = next((sp for sp in sorted(spans, key=lambda x: -(x[1] - x[0])) if sp[0] == pos), None)
+        if not hit:
+            break
+        subject.append(hit[2])
+        if hit[1] < len(lower) and lower[hit[1]] in "·ㆍ/&":
+            pos = hit[1] + 1
+            continue
+        break
+    return list(dict.fromkeys(subject)) if subject and len(matched) > 1 else matched
 
 
 def get_news_tag(clean_title: str, link: str) -> str:
@@ -288,7 +312,26 @@ def same_story(a: dict, b: dict, company: str) -> bool:
         return True
     if abs((a["pub_date"] - b["pub_date"]).total_seconds()) > 3 * 86400:
         return False
+    if _same_amount(a["title"], b["title"]):
+        return True
     return len(key_tokens(a["title"], company) & key_tokens(b["title"], company)) >= 2
+
+
+AMOUNT_TOKEN_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(조|억)")
+
+
+def _amounts(title: str) -> set:
+    out = set()
+    for num, unit in AMOUNT_TOKEN_RE.findall(title):
+        v = float(num.replace(",", "")) * (10000 if unit == "조" else 1)
+        if v >= 10:  # 10억 이상만 (작은 숫자는 우연히 겹치기 쉽다)
+            out.add(v)
+    return out
+
+
+def _same_amount(t1: str, t2: str) -> bool:
+    """'480억'과 '479억'처럼 같은 계약·투자 금액을 쓴 제목"""
+    return any(abs(x - y) <= max(x, y) * 0.01 for x in _amounts(t1) for y in _amounts(t2))
 
 
 def format_date_string(dt: datetime) -> str:
