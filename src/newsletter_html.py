@@ -108,18 +108,30 @@ def _header(now: datetime, stats: dict) -> str:
 
 
 BIG_AMOUNT_RE = re.compile(r"\d[\d,.]*\s*(?:조|억)(?:\s*\d[\d,.]*\s*만)?\s*(?:원|달러|엔)?")
-VERB_RULES = (("투자협약", "투자협약"), ("협약", "협약"), ("MOU", "MOU"), ("계약", "계약"), ("인수", "인수"), ("투자", "투자"), ("수주", "수주"), ("증설", "증설"), ("공급", "공급"))
+VERB_RULES = (("투자협약", "투자협약"), ("협약", "협약"), ("MOU", "MOU"), ("보조금", "보조금"), ("계약", "계약"), ("인수", "인수"), ("투자", "투자"), ("수주", "수주"), ("증설", "증설"), ("공급", "공급"))
+EARNINGS_WORDS = ("영업이익", "매출", "순이익")
+MIN_HEADLINE_EOK = 100  # 100억 미만은 제목줄·핵심 줄에 올리지 않는다 (보조금 5억 같은 작은 금액이 핵심처럼 보이는 것을 막는다)
+
+
+def _eok(text: str) -> float:
+    num = float(re.search(r"\d[\d,.]*", text).group(0).replace(",", ""))
+    return num * 10000 if "조" in text else num
 
 
 def headline_phrase(company: str, article: dict) -> str:
-    """'대덕전자 6150억 투자'처럼 제목에 실제로 있는 금액·행위만으로 만든 짧은 문구 (금액이 없으면 빈 문자열).
-    분류가 아닌 제목 속 낱말을 써서 사실과 다른 표현이 들어가지 않게 한다."""
-    m = BIG_AMOUNT_RE.search(article["title"])
-    if not m:
+    """'대덕전자 6150억 투자'처럼 제목에 실제로 있는 금액·행위 낱말만으로 만든 짧은 문구.
+    금액이 100억 미만이거나 행위를 알 수 없으면 빈 문자열 (분류가 아닌 제목 속 낱말만 쓴다)."""
+    title = article["title"]
+    m = BIG_AMOUNT_RE.search(title)
+    if not m or (not re.search(r"달러|엔|위안", m.group(0)) and _eok(m.group(0)) < MIN_HEADLINE_EOK):
         return ""
     amount = re.sub(r"(?<=[억조])원$", "", re.sub(r"\s+", "", m.group(0)))  # '6150억원'→'6150억', '56억7566만원'은 그대로
-    verb = next((v for key, v in VERB_RULES if key in article["title"]), "")
-    return " ".join(x for x in (get_display_name(company), amount, verb) if x)
+    name = get_display_name(company)
+    earn = next((w for w in EARNINGS_WORDS if w in title), "")
+    if earn:
+        return f"{name} {earn} {amount}"
+    verb = next((v for key, v in VERB_RULES if key in title), "")
+    return f"{name} {amount} {verb}" if verb else ""
 
 
 def lead_phrases(highlights: list, n: int = 3) -> list:
