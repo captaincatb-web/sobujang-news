@@ -1114,12 +1114,18 @@
   "total": 73
  },
  "2026-10-29": {
-  "extra_companies": 37,
+  "extra_companies": 36,
   "extra_total": 249,
-  "fresh_companies": 33,
+  "fresh_companies": 31,
   "fresh_dart": 16,
-  "fresh_news": 83,
+  "fresh_news": 77,
   "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "ASML",
+    "link": "https://n.news.naver.com/article/001/0016407749?sid=102",
+    "title": "이상일 용인시장, 네덜란드 ASML 방문…반도체 협력방안 논의"
+   },
    {
     "cat": "수주·협력",
     "company": "하나머티리얼즈",
@@ -1127,16 +1133,10 @@
     "title": "디와이피엔에프-하나머티리얼즈, 실리콘 음극재 양산공장 EPC 계약 체결"
    },
    {
-    "cat": "수주·협력",
-    "company": "ASML",
-    "link": "http://www.enewstoday.co.kr/news/articleView.html?idxno=2485149",
-    "title": "이상일 용인시장, ASML·ST마이크로 방문…반도체 협력 모색"
-   },
-   {
-    "cat": "실적",
-    "company": "삼성전기",
-    "link": "http://m.kjdaily.com/article.php?aid=1793202057690551276",
-    "title": "삼성전기, 3분기 영업이익 6,910억원…전년比 165.5% 급증"
+    "cat": "투자·증설",
+    "company": "인테그리스",
+    "link": "http://www.ansansm.co.kr/news/articleView.html?idxno=53347",
+    "title": "‘제1호 투자유치기업’ 인테그리스코리아 보조금 5억 원 지급"
    }
   ],
   "total": 73
