@@ -17,9 +17,10 @@ from src.news_source_catalog import (
     GLOBAL_SEMICON_RSS,
     KOREAN_INDUSTRY_RSS,
 )
-from src.newsletter_collector import build_alias_map, find_companies
+from src.newsletter_collector import HEADERS, build_alias_map, find_companies
 
-USER_AGENT = "Mozilla/5.0 (compatible; NewsFeedAudit/1.0)"
+USER_AGENT = HEADERS["User-Agent"]
+BROWSER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 TIMEOUT = 16
 
 
@@ -37,12 +38,12 @@ def catalog():
     ] + [(name, url, "official", company) for name, url, company in COMPANY_OFFICIAL_RSS]
 
 
-def probe(item):
+def probe(item, *, user_agent=None):
     name, url, kind, company = item
     record = {"name": name, "url": url, "kind": kind, "company": company,
               "status": "error", "http": None, "entries": 0, "match_count": 0, "examples": []}
     try:
-        response = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
+        response = requests.get(url, headers={"User-Agent": user_agent or USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml, */*"}, timeout=TIMEOUT)
         record["http"] = response.status_code
         if not response.ok:
             record["reason"] = "HTTP " + str(response.status_code)
@@ -78,12 +79,17 @@ def main():
     with ThreadPoolExecutor(max_workers=6) as executor:
         results = list(executor.map(probe, catalog()))
     successful = sum(r["status"] == "ok" for r in results)
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         alternatives = list(executor.map(probe, ALTERNATIVE_IR))
+        header_checks = list(executor.map(
+            lambda item: probe(item, user_agent=BROWSER_AGENT),
+            [item for item in catalog() if item[0] in ("SemiWiki", "Applied Materials IR")]
+        ))
     report = {"checked_at_utc": datetime.now(timezone.utc).isoformat(),
               "sources_total": len(results), "sources_ok": successful,
               "sources_failed": len(results) - successful, "sources": results,
-              "alternative_ir_candidates": alternatives}
+              "alternative_ir_candidates": alternatives,
+              "browser_header_checks": header_checks}
     dest = Path(args.output)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -96,6 +102,9 @@ def main():
     for candidate in alternatives:
         print(f"[ALTERNATIVE] {candidate['name']}: {candidate['status']} HTTP={candidate['http']} "
               f"entries={candidate['entries']} {candidate.get('reason', '')}")
+    for variant in header_checks:
+        print(f"[BROWSER UA] {variant['name']}: {variant['status']} HTTP={variant['http']} "
+              f"entries={variant['entries']} {variant.get('reason', '')}")
     print(f"RESULT: {successful}/{len(results)} functioning RSS/Atom feeds. "
           f"Report saved to {dest}", flush=True)
     # This is a diagnostic job: source errors are reported, rather than hidden;
