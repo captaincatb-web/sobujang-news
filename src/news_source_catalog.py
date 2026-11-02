@@ -6,6 +6,7 @@
 URL 참고:
 - 국내 RSS: 한국경제, 조선비즈, 연합뉴스, 파이낸셜뉴스, 아시아경제
 - 해외 RSS: Semiconductor Engineering, EE Times, SemiWiki, SemiAnalysis
+- 2026-11-02 검증: SemiWiki는 기본 UA에서 403, Chrome UA에서는 정상; Applied Materials 공식 RSS는 403으로 비활성화
 RSS 제공·접속 정책은 변경될 수 있어 실행 시 상태를 별도로 기록한다.
 """
 
