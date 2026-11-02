@@ -5,6 +5,7 @@ from calendar import timegm
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
+from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
