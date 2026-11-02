@@ -9,7 +9,7 @@ from src.newsletter_extra_groups import EXTRA_AMBIGUOUS, EXTRA_DUP_OF, EXTRA_RAW
 
 RECIPIENT_EMAIL_DEFAULT = "devla@naver.com"
 FIXED_COMPANY_LIMIT = 2
-SIMILARITY_THRESHOLD = 0.30
+SIMILARITY_THRESHOLD = 0.55
 MAX_STORED_PER_COMPANY = 30
 MAX_FOREIGN_PER_COMPANY = 5  # 영문 기사는 양이 많아 국문 기사를 밀어내지 않도록 따로 상한을 둔다
 MAX_SIM = 1  # 기사당 표시할 유사기사 최대 건수

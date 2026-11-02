@@ -96,7 +96,7 @@ def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = 
   <header class="mast">
     <div class="wrap mast-row">
       <a class="mast-name" href="{home}">소부장 주간 동향</a>
-      <nav class="mast-nav" aria-label="바로가기">{nav}<a href="{prefix}dashboard.html">올해 대시보드</a></nav>
+      <nav class="mast-nav" aria-label="바로가기">{nav}<a href="{prefix}dashboard.html">올해 대시보드</a><a href="{prefix}quality.html">수집 품질</a></nav>
     </div>
   </header>
   <main id="content" class="wrap">
@@ -171,7 +171,7 @@ def _write_week_page(k: str, s: dict, body_html: str, prev_k, next_k) -> None:
     <section class="hero">
       <p class="kicker">{d.year}년 {d.month}월 {d.day}일 {WEEKDAY[d.weekday()]}요일 발행 · {start.month}/{start.day} ~ {d.month}/{d.day}</p>
       <h1>{title_txt} <em>{s['fresh_news']}</em>건</h1>
-      <p class="sub">1~4그룹 {s['total']}곳 기준 · 공시 {s['fresh_dart']}건 포함 · 소식이 있는 회사 {s['fresh_companies']}곳{extra}</p>
+      <p class="sub">1~4그룹 {s['total']}곳 기준 · 공시 {s['fresh_dart']}건 별도 집계 · 소식이 있는 회사 {s['fresh_companies']}곳{extra}</p>
     </section>
     <div class="tools">
       <label class="search"><span class="sr">이 주 소식 검색</span>
@@ -240,7 +240,7 @@ def _write_index(meta: dict) -> None:
     <section class="feature" aria-labelledby="latest">
       <p class="kicker">최신 · {ld.year}.{ld.month:02d}.{ld.day:02d}({WEEKDAY[ld.weekday()]}) 발행</p>
       <h1 id="latest"><a href="news/{latest}.html">이번 주 소식 <em>{ls['fresh_news']}</em>건</a></h1>
-      <p class="sub">1~4그룹 {ls['total']}곳 기준 · 공시 {ls['fresh_dart']}건 포함 · 소식이 있는 회사 {ls['fresh_companies']}곳</p>
+      <p class="sub">1~4그룹 {ls['total']}곳 기준 · 공시 {ls['fresh_dart']}건 별도 집계 · 소식이 있는 회사 {ls['fresh_companies']}곳</p>
       <ul class="heads">{heads(ls)}</ul>
       <p><a class="go" href="news/{latest}.html">이 주 전체 보기 →</a></p>
     </section>"""

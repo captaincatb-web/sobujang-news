@@ -9,3 +9,25 @@
 ## 처음 한 번 설정
 1. Settings → Pages → Source를 **GitHub Actions**로 바꿉니다.
 2. (선택) Settings → Secrets → Actions에 `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`, `OPENDART_KEY` 등록 — 없어도 동작합니다.
+
+## 수집 소스 확대 및 품질 모니터링
+
+기존 Google News 검색·Naver 뉴스·DART·기존 전문매체 RSS는 유지하면서
+`src/news_source_catalog.py`에 보조 RSS 11개를 활성화했습니다. (Applied Materials IR 1개는 HTTP 403으로 비활성화)
+
+- 국내 5개: 한국경제, 조선비즈, 연합뉴스(경제), 파이낸셜뉴스, 아시아경제
+- 해외 반도체 전문매체 4개: Semiconductor Engineering, EE Times, SemiWiki, SemiAnalysis
+- 공식 발표/IR 활성 2개: Lam Research, 삼성 반도체 뉴스룸
+- 공식 발표/IR 보류 1개: Applied Materials (GitHub Actions에서 HTTP 403, 기존 Google News 검색으로 보완)
+
+새로운 소스는 등록 기업의 뉴스만 대상으로 하며 기존 중복/품질 필터를 통과해야 화면에 표시됩니다.
+공식 IR 피드는 확정된 회사에 직접 귀속하고, 일반 언론사 RSS는 기업명 매칭을 우선합니다.
+실제 외부 피드의 가용성은 주간 실행 결과를 통해 확인하며, 실패한 소스는 별도 집계합니다.
+
+정상 수집 이후 `site/quality.html` (메뉴: **수집 품질**)에서 수집 성공률, 출처별 기사 수,
+최근 기사 확인 기업 수, AI 분석/미검토 수 등을 확인할 수 있습니다.
+`data/news_collection_health.json`은 주간 상태 이력을 보관합니다.
+이 수치들은 기사 정답 검수에 근거한 정확도/재현율이 아니며, 기사 적합률은 별도 검수가 필요합니다.
+
+품질 확인용 CI: `python -m unittest discover -s tests -p "test_*.py" -v`.
+아직 첫 주간 실행 결과가 없다면 품질 페이지는 **집계 준비 중**으로 표시합니다.

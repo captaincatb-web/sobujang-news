@@ -2,8 +2,10 @@ import html
 import os
 import re
 from calendar import timegm
-from collections import Counter
+from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
+from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
@@ -11,7 +13,11 @@ import feedparser
 import requests
 
 from src.history import KST
-from src.news_sources import fetch_naver_news, google_news_url
+from src.news_sources import BROWSER_HEADERS, fetch_naver_news, google_news_url
+from src.news_source_catalog import (
+    ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS, COMPANY_OFFICIAL_RSS,
+    KOREAN_INDUSTRY_RSS, GLOBAL_SEMICON_RSS,
+)
 from src.newsletter_config import (
     COMPANY_ALIAS_RAW,
     DART_CORP_CODES,
@@ -30,8 +36,34 @@ from src.newsletter_config import (
     all_company_names,
 )
 
+EXTRA_SOURCE_NAMES = {
+    **{url: name for name, url in KOREAN_INDUSTRY_RSS + GLOBAL_SEMICON_RSS},
+    **{url: name for name, url, _company in COMPANY_OFFICIAL_RSS},
+}
+SOURCE_FAILURES = []
+LAST_COLLECTION_REPORT = {}
+_SOURCE_LOCK = Lock()
+
+
+def _record_source_error(source: dict, reason: str) -> None:
+    """별도 스레드의 수집 실패를 API 키/개별 URL 노출 없이 모은다."""
+    with _SOURCE_LOCK:
+        SOURCE_FAILURES.append({
+            "kind": source["kind"],
+            "source": EXTRA_SOURCE_NAMES.get(source.get("url"), source.get("company") or source["kind"]),
+            "reason": str(reason)[:100],
+        })
+
+
 REQUEST_TIMEOUT = 20
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+HEADERS = {"User-Agent": "Mozilla/5.0", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
+
+
+def rss_request_headers(url: str) -> dict:
+    """사이트별 테스트를 통해 확인된 RSS User-Agent를 적용한다."""
+    if "semiwiki.com" in url:
+        return {**HEADERS, "User-Agent": BROWSER_HEADERS["User-Agent"]}
+    return HEADERS
 
 PHOTO_CAPTION_RE = re.compile(r"[\(\[〈][^\)\]〉]*사진[^\)\]〉]*[\)\]〉]\s*$")
 PHOTO_TAG_RE = re.compile(r"^\s*[\(\[〈]\s*포토\s*[\)\]〉]")
@@ -209,10 +241,8 @@ LEAD_RE = re.compile(r"^(?:\s*\[[^\]]*\]|\s*\([^)]*\)|\s*<[^>]*>)*\s*")
 
 def find_companies(clean_title: str, alias_map: dict) -> list:
     lower = clean_title.lower()
-    if "skc" in lower or "에스케이씨" in lower:
-        return []
-    if "와이씨켐" in lower or "ycchem" in lower or "yc chem" in lower:
-        return []
+    # 특정 회사명 때문에 다른 회사까지 모두 버리지 않는다.
+    # 짧은 별칭(와이씨 등)은 _company_spans의 최장 일치 규칙으로 구분한다.
     spans = _company_spans(lower, alias_map)
     matched = list(dict.fromkeys(co for _, _, co in sorted(spans)))
     # 제목이 'A사, …'처럼 협력사 이름으로 시작하면 그 회사(·로 이어진 회사까지)의 소식으로 본다
@@ -310,13 +340,20 @@ def key_tokens(title: str, company: str) -> set:
 
 def same_story(a: dict, b: dict, company: str) -> bool:
     """글자 유사도가 높거나, 사흘 이내 기사끼리 핵심 단어가 2개 이상 겹치면 같은 소식"""
+    # 동일 금액이라는 이유만으로 서로 다른 계약/투자 사건을 합치지 않는다.
+    amounts_a, amounts_b = _amounts(a["title"]), _amounts(b["title"])
+    if amounts_a and amounts_b and not _same_amount(a["title"], b["title"]):
+        return False
+    if abs((a["pub_date"] - b["pub_date"]).total_seconds()) > 7 * 86400:
+        return False
     if similarity(a["title"], b["title"], company) >= SIMILARITY_THRESHOLD:
         return True
     if abs((a["pub_date"] - b["pub_date"]).total_seconds()) > 3 * 86400:
         return False
-    if _same_amount(a["title"], b["title"]):
-        return True
-    return len(key_tokens(a["title"], company) & key_tokens(b["title"], company)) >= 2
+    shared = key_tokens(a["title"], company) & key_tokens(b["title"], company)
+    # 계약 금액만 일치하는 것은 동일 사건의 근거가 아니다.
+    shared = {token for token in shared if not re.match(r"^[0-9][0-9_.,]*(?:억|조|만원|원|달러|%)?$", token)}
+    return len(shared) >= 2
 
 
 AMOUNT_TOKEN_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(조|억)")
@@ -344,7 +381,7 @@ NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
 
 # 소스 우선순위: 같은 기사가 여러 곳에서 오면 먼저 처리된 소스의 링크·제목을 남긴다
 # (원문 링크·정확한 시각을 주는 소스 먼저, 네이버 검색 페이지는 긴 제목이 잘려 와서 마지막)
-SOURCE_PRIORITY = {"dart": 0, "naver": 1, "rss": 2, "google": 3, "google_en": 4, "naver_web": 5}
+SOURCE_PRIORITY = {"dart": 0, "press": 1, "naver": 2, "rss": 3, "rss_global": 4, "google": 5, "google_en": 6, "naver_web": 7}
 
 # 네이버 API는 언론사명을 주지 않으므로 원문 도메인으로 표기
 PRESS_BY_DOMAIN = {
@@ -416,8 +453,11 @@ def build_sources(asof: datetime | None = None) -> list:
     for company, code in DART_CORP_CODES.items():
         if code:
             sources.append({"kind": "dart", "url": f"https://dart.fss.or.kr/api/companyRSS.xml?crpCd={code}", "company": company})
-    for url in RSS_LIST:
-        sources.append({"kind": "google" if "news.google.com" in url else "rss", "url": url, "company": ""})
+    for name, url, company in COMPANY_OFFICIAL_RSS:
+        sources.append({"kind": "press", "url": url, "company": company})
+    for url in dict.fromkeys([*RSS_LIST, *ADDITIONAL_RSS_URLS]):
+        kind = "google" if "news.google.com" in url else ("rss_global" if url in GLOBAL_RSS_URLS else "rss")
+        sources.append({"kind": kind, "url": url, "company": ""})
     # 회사별 개별 검색: OR로 묶은 검색은 결과 100건 한도에 큰 회사 기사가 몰려 작은 회사가 누락됨
     for company in all_company_names():
         terms = _search_terms(company)
@@ -441,15 +481,25 @@ def _fetch_feed(source: dict) -> list:
     if kind == "naver":
         return _fetch_naver(source["query"])
     if kind == "naver_web":
-        return fetch_naver_news(source["term"])
+        status = {}
+        items = fetch_naver_news(source["term"], status=status)
+        if status.get("error"):
+            _record_source_error(source, status["error"])
+        return items
     url = source["url"]
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(url, headers=rss_request_headers(url), timeout=REQUEST_TIMEOUT)
         if resp.status_code != 200:
+            _record_source_error(source, f"HTTP {resp.status_code}")
             print(f"[rss] {resp.status_code} {url}")
             return []
-        entries = feedparser.parse(resp.content).entries
+        parsed = feedparser.parse(resp.content)
+        if parsed.bozo and not parsed.entries:
+            _record_source_error(source, "RSS 파싱 실패")
+            return []
+        entries = parsed.entries
     except requests.RequestException as e:
+        _record_source_error(source, type(e).__name__)
         print(f"[rss] 조회 실패 {url}: {e}")
         return []
     items = []
@@ -471,6 +521,7 @@ def _fetch_naver(query: str) -> list:
         resp.raise_for_status()
         raw_items = resp.json().get("items", [])
     except (requests.RequestException, ValueError) as e:
+        _record_source_error({"kind": "naver"}, type(e).__name__)
         print(f"[naver] '{query}' 조회 실패: {e}")
         return []
     items = []
@@ -541,6 +592,8 @@ def collect_articles(asof: datetime | None = None) -> dict:
     alias_map = build_alias_map()
     sources = build_sources(asof)
     FALSE_POSITIVE_CASES.clear()
+    LAST_COLLECTION_REPORT.clear()
+    SOURCE_FAILURES.clear()
 
     with ThreadPoolExecutor(max_workers=16) as pool:
         feeds = list(pool.map(_fetch_feed, sources))
@@ -549,9 +602,10 @@ def collect_articles(asof: datetime | None = None) -> dict:
     cutoff = now - timedelta(days=MAX_AGE_DAYS)
     fresh_cutoff = now - timedelta(days=FRESH_DAYS)
     raw, kept, reasons = Counter(), Counter(), Counter()
+    accepted_by_source = Counter()
     dropped = []  # 회사명이 든 최근 기사 중 걸러진 것 (필터 점검용)
     valid_articles = []
-    seen_titles, seen_stale = set(), set()
+    seen_titles = defaultdict(set)  # 전체 기사가 아닌 회사별 제목 중복 제거
     for source, items in zip(sources, feeds):
         kind, fixed_company = source["kind"], source["company"]
         raw[kind] += len(items)
@@ -563,21 +617,11 @@ def collect_articles(asof: datetime | None = None) -> dict:
             # 포털 검색 제목에는 '- 언론사' 꼬리가 없어 그대로 쓴다
             clean_title = title.strip() if item.get("clean") else get_clean_title(title, link)
             src_name = item["source"]
-            # 같은 기사가 다른 소스/언론사로 들어와도 한 번만 (공백·기호 차이 무시, 잘린 제목은 앞부분 일치)
             norm = normalize_title(clean_title)
-            if not norm or norm in seen_titles:
+            if not norm:
                 continue
-            if item.get("truncated") and any(t.startswith(norm) for t in seen_titles):
-                continue
-            if is_stale(clean_title, link, now):
-                # 재게시된 옛 기사는 같은 제목의 최신 기사를 막지 않도록 따로 기억한다
-                if norm in seen_stale:
-                    continue
-                seen_stale.add(norm)
-                reason = "옛 기사"
-            else:
-                seen_titles.add(norm)
-                reason = _drop_reason(clean_title, link, src_name)
+            # 오래된 재게시 기사는 제목을 캐시에 등록하지 않는다.
+            reason = "옛 기사" if is_stale(clean_title, link, now) else _drop_reason(clean_title, link, src_name)
             if not reason and fixed_company and re.search(r"\[첨부(추가|정정)\]", clean_title):
                 reason = "첨부 정정 공시"  # 첨부서류만 추가·정정한 재제출 공시는 소식 가치가 없다
             if not reason and not fixed_company:
@@ -604,11 +648,19 @@ def collect_articles(asof: datetime | None = None) -> dict:
             }
 
             if fixed_company:
-                # 회사별 DART 피드: 매칭/오탐필터 우회 → 해당 회사로 직접 귀속
+                # DART는 동일 제목의 공시가 서로 다른 회사에서 발생할 수 있다.
+                titles = seen_titles[fixed_company]
+                # 개별 접수번호가 다른 공시는 제목이 같아도 독립된 공시다.
+                receipt = re.search(r"(?:rcpNo=|rcpno=)([0-9]{10,14})", link, re.I)
+                unique_key = ("dart:" + receipt.group(1)) if receipt else ("url:" + link if is_dart_link(link) else norm)
+                if unique_key in titles:
+                    continue
+                titles.add(unique_key)
                 valid_articles.append(
                     {**base, "company": fixed_company, "cat3": "공시자료" if is_dart_link(link) else "기업동향"}
                 )
                 kept[kind] += 1
+                accepted_by_source[source.get("url", "")] += 1
                 continue
 
             names = find_companies(clean_title, alias_map)
@@ -623,9 +675,17 @@ def collect_articles(asof: datetime | None = None) -> dict:
                 if any(c not in ENGLISH_SEARCH_TERMS for c in matched):
                     reasons["영문 국내사"] += 1
                 matched = [c for c in matched if c in ENGLISH_SEARCH_TERMS]
+            accepted = False
             for company in matched:
+                titles = seen_titles[company]
+                # 잘린 네이버 제목은 같은 기업의 더 긴 제목이 이미 있다면 생략한다.
+                if norm in titles or (item.get("truncated") and any(t.startswith(norm) for t in titles)):
+                    continue
+                titles.add(norm)
                 valid_articles.append({**base, "company": company, "cat3": "기업동향"})
-            kept[kind] += bool(matched)
+                accepted = True
+            kept[kind] += int(accepted)
+            accepted_by_source[source.get("url", "")] += int(accepted)
 
     by_company = {c: [] for c in all_company_names()}
     for article in valid_articles:
@@ -648,6 +708,38 @@ def collect_articles(asof: datetime | None = None) -> dict:
     print("소스별 채택 건수:", dict(kept))
     print("제외 사유:", dict(reasons))
     print(f"수집 완료: {len(valid_articles)}건 / 기사 있는 회사 {covered}/{len(by_company)} (최근 {FRESH_DAYS}일 {fresh_covered}곳)")
+    failures = list(SOURCE_FAILURES)
+    failure_groups = Counter(f["kind"] for f in failures)
+    failed_extra = {f["source"] for f in failures}
+    extra_details = [
+        {
+            "name": EXTRA_SOURCE_NAMES[s["url"]],
+            "kind": s["kind"],
+            "raw": len(items),
+            "accepted": accepted_by_source[s["url"]],
+            "status": "error" if EXTRA_SOURCE_NAMES[s["url"]] in failed_extra else "ok",
+        }
+        for s, items in zip(sources, feeds) if s.get("url") in EXTRA_SOURCE_NAMES
+    ]
+    LAST_COLLECTION_REPORT.update({
+        "sources_total": len(sources),
+        "sources_failed": len(failures),
+        "failed_by_kind": dict(failure_groups),
+        "failure_examples": list({(f["source"], f["reason"]): f for f in failures}.values())[:10],
+        "additional_sources": extra_details,
+        "sources_by_kind": dict(Counter(s["kind"] for s in sources)),
+        "raw_by_kind": dict(raw),
+        "kept_by_kind": dict(kept),
+        "excluded_by_reason": dict(reasons),
+        "articles_kept": len(valid_articles),
+        "companies_total": len(by_company),
+        "companies_covered": covered,
+        "companies_fresh": fresh_covered,
+    })
+    if not sum(raw.values()) or not valid_articles:
+        raise RuntimeError("유효 뉴스 수집 0건: 이전 발행본 보존을 위해 새 발행 중단")
+    if failures:
+        print(f"[수집 경고] 소스 오류 {len(failures)}/{len(sources)}건: {dict(failure_groups)}")
     if not asof:
         _write_collect_report(raw, kept, reasons, dropped, by_company, fresh_cutoff)
     return by_company

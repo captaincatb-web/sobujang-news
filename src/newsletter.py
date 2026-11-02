@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime, timedelta
 
-from src import gnews_decoder, site
+from src import collection_quality, gnews_decoder, newsletter_collector, site
 from src.config import ROOT_DIR
 from src.history import KST
 from src.newsletter_ai import apply_ai_analysis
@@ -34,7 +34,7 @@ def main() -> None:
     now = datetime.now(KST)
     grouped = group_similar(collect_articles())
     resolve_links(grouped, now)
-    apply_ai_analysis(grouped, now)
+    ai_stats = apply_ai_analysis(grouped, now)
     selections = finalize_links(grouped, now)
     highlights = pick_highlights(selections, now)
 
@@ -72,6 +72,7 @@ def main() -> None:
     (OUTPUT_DIR / "subject.txt").write_text(subject, encoding="utf-8")
     print(f"HTML 저장: {out_path} ({len(html_body.encode()) // 1024}KB) / 제목: {subject}")
     site.publish_week(now, html_body, stats, highlights)
+    collection_quality.record_health(now, newsletter_collector.LAST_COLLECTION_REPORT, ai_stats)
     if len(html_body.encode()) > 100 * 1024:
         print("[경고] HTML이 100KB를 넘습니다 (메일로 보낼 경우 Gmail이 본문 끝을 자릅니다).")
 

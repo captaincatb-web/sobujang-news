@@ -108,8 +108,8 @@ class _Pacer:
 _naver_pacer = _Pacer(NAVER_INTERVAL)
 
 
-def fetch_naver_news(term: str, now: datetime | None = None) -> list:
-    """네이버 뉴스 제목검색 (최신순): 회사명이 제목에 든 최근 기사 15건"""
+def fetch_naver_news(term: str, now: datetime | None = None, *, status: dict | None = None) -> list:
+    """뉴스 제목검색. status를 전달하면 차단·오류·파싱 실패를 호출자에게 알린다."""
     now = now or datetime.now(timezone.utc)
     for url, where in NAVER_HOSTS:
         if url in _naver_pacer.blocked:
@@ -119,16 +119,26 @@ def fetch_naver_news(term: str, now: datetime | None = None) -> list:
         try:
             resp = requests.get(url, params=params, headers=BROWSER_HEADERS, timeout=REQUEST_TIMEOUT)
         except requests.RequestException as e:
+            if status is not None:
+                status["error"] = type(e).__name__
             print(f"[naver_web] '{term}' 조회 실패: {e}")
             return []
         if resp.status_code in (403, 429):
-            _naver_pacer.blocked.add(url)
-            print(f"[naver_web] {url} 차단({resp.status_code}) → 이번 수집에서는 이 주소를 더 쓰지 않음")
+            with _naver_pacer.lock:
+                _naver_pacer.blocked.add(url)
+            print(f"[naver_web] {url} 차단({resp.status_code}) → 다른 주소로 대체")
             continue
         if resp.status_code != 200:
+            if status is not None:
+                status["error"] = f"HTTP {resp.status_code}"
             print(f"[naver_web] '{term}' 응답 {resp.status_code}")
             return []
-        return parse_naver_news(resp.text, now)
+        items = parse_naver_news(resp.text, now)
+        if status is not None and not items and 'data-heatmap-target=".prof"' in resp.text:
+            status["error"] = "뉴스 HTML 파싱 결과 없음 (레이아웃 변경 가능)"
+        return items
+    if status is not None:
+        status["error"] = "네이버 검색 주소 전체 차단(403/429)"
     return []
 
 

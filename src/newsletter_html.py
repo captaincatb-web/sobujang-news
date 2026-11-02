@@ -98,7 +98,7 @@ def _header(now: datetime, stats: dict) -> str:
         f'{now.year}.{now.month:02d}.{now.day:02d}({WEEKDAYS[now.weekday()]}) 발행 · '
         f"수집 기간 {start.month}/{start.day} ~ {now.month}/{now.day} · "
         f'1~4그룹 이번 주 새 소식 <b>{stats["fresh_news"]}건</b>{_delta(stats["fresh_news"], prev.get("fresh_news"))} '
-        f'(공시 {stats["fresh_dart"]}건) · '
+        f'(공시 {stats["fresh_dart"]}건 별도 집계) · '
         f'소식 있는 회사 {stats["fresh_companies"]}/{stats["total_companies"]}곳'
         f'{_delta(stats["fresh_companies"], prev.get("fresh_companies"))}'
         f'{vs}'
