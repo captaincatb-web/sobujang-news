@@ -14,6 +14,7 @@ PUBLIC_DIR = ROOT_DIR / "site"
 
 SOURCE_LABELS = {
     "dart": "DART 공시",
+    "press": "기업 공식 발표·IR RSS",
     "google": "Google News",
     "google_en": "Google News 영문",
     "naver": "Naver 공식 API",
