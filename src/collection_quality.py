@@ -18,7 +18,8 @@ SOURCE_LABELS = {
     "google_en": "Google News 영문",
     "naver": "Naver 공식 API",
     "naver_web": "Naver 웹 검색",
-    "rss": "언론사 RSS",
+    "rss": "국내 언론사 RSS",
+    "rss_global": "해외 반도체 전문매체 RSS",
 }
 
 
