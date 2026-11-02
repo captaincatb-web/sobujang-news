@@ -13,7 +13,7 @@ import requests
 
 from src.history import KST
 from src.news_sources import fetch_naver_news, google_news_url
-from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS
+from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS, COMPANY_OFFICIAL_RSS
 from src.newsletter_config import (
     COMPANY_ALIAS_RAW,
     DART_CORP_CODES,
@@ -362,7 +362,7 @@ NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
 
 # 소스 우선순위: 같은 기사가 여러 곳에서 오면 먼저 처리된 소스의 링크·제목을 남긴다
 # (원문 링크·정확한 시각을 주는 소스 먼저, 네이버 검색 페이지는 긴 제목이 잘려 와서 마지막)
-SOURCE_PRIORITY = {"dart": 0, "naver": 1, "rss": 2, "rss_global": 3, "google": 4, "google_en": 5, "naver_web": 6}
+SOURCE_PRIORITY = {"dart": 0, "press": 1, "naver": 2, "rss": 3, "rss_global": 4, "google": 5, "google_en": 6, "naver_web": 7}
 
 # 네이버 API는 언론사명을 주지 않으므로 원문 도메인으로 표기
 PRESS_BY_DOMAIN = {
@@ -434,6 +434,8 @@ def build_sources(asof: datetime | None = None) -> list:
     for company, code in DART_CORP_CODES.items():
         if code:
             sources.append({"kind": "dart", "url": f"https://dart.fss.or.kr/api/companyRSS.xml?crpCd={code}", "company": company})
+    for name, url, company in COMPANY_OFFICIAL_RSS:
+        sources.append({"kind": "press", "url": url, "company": company})
     for url in dict.fromkeys([*RSS_LIST, *ADDITIONAL_RSS_URLS]):
         kind = "google" if "news.google.com" in url else ("rss_global" if url in GLOBAL_RSS_URLS else "rss")
         sources.append({"kind": kind, "url": url, "company": ""})
