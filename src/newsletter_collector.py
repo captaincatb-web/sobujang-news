@@ -13,6 +13,7 @@ import requests
 
 from src.history import KST
 from src.news_sources import fetch_naver_news, google_news_url
+from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS
 from src.newsletter_config import (
     COMPANY_ALIAS_RAW,
     DART_CORP_CODES,
@@ -361,7 +362,7 @@ NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
 
 # 소스 우선순위: 같은 기사가 여러 곳에서 오면 먼저 처리된 소스의 링크·제목을 남긴다
 # (원문 링크·정확한 시각을 주는 소스 먼저, 네이버 검색 페이지는 긴 제목이 잘려 와서 마지막)
-SOURCE_PRIORITY = {"dart": 0, "naver": 1, "rss": 2, "google": 3, "google_en": 4, "naver_web": 5}
+SOURCE_PRIORITY = {"dart": 0, "naver": 1, "rss": 2, "rss_global": 3, "google": 4, "google_en": 5, "naver_web": 6}
 
 # 네이버 API는 언론사명을 주지 않으므로 원문 도메인으로 표기
 PRESS_BY_DOMAIN = {
@@ -433,8 +434,9 @@ def build_sources(asof: datetime | None = None) -> list:
     for company, code in DART_CORP_CODES.items():
         if code:
             sources.append({"kind": "dart", "url": f"https://dart.fss.or.kr/api/companyRSS.xml?crpCd={code}", "company": company})
-    for url in RSS_LIST:
-        sources.append({"kind": "google" if "news.google.com" in url else "rss", "url": url, "company": ""})
+    for url in dict.fromkeys([*RSS_LIST, *ADDITIONAL_RSS_URLS]):
+        kind = "google" if "news.google.com" in url else ("rss_global" if url in GLOBAL_RSS_URLS else "rss")
+        sources.append({"kind": kind, "url": url, "company": ""})
     # 회사별 개별 검색: OR로 묶은 검색은 결과 100건 한도에 큰 회사 기사가 몰려 작은 회사가 누락됨
     for company in all_company_names():
         terms = _search_terms(company)
@@ -698,8 +700,8 @@ def collect_articles(asof: datetime | None = None) -> dict:
         "companies_covered": covered,
         "companies_fresh": fresh_covered,
     })
-    if not sum(raw.values()):
-        raise RuntimeError("뉴스 수집 원본 0건: 발행 중단 (소스 상태와 API 설정 확인)")
+    if not sum(raw.values()) or not valid_articles:
+        raise RuntimeError("유효 뉴스 수집 0건: 이전 발행본 보존을 위해 새 발행 중단")
     if failures:
         print(f"[수집 경고] 소스 오류 {len(failures)}/{len(sources)}건: {dict(failure_groups)}")
     if not asof:
