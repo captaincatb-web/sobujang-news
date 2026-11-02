@@ -4,6 +4,7 @@ import re
 from calendar import timegm
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
@@ -29,6 +30,17 @@ from src.newsletter_config import (
     SIMILARITY_THRESHOLD,
     all_company_names,
 )
+
+SOURCE_FAILURES = []
+LAST_COLLECTION_REPORT = {}
+_SOURCE_LOCK = Lock()
+
+
+def _record_source_error(source: dict, reason: str) -> None:
+    """별도 스레드의 수집 실패를 API 키/개별 URL 노출 없이 모은다."""
+    with _SOURCE_LOCK:
+        SOURCE_FAILURES.append({"kind": source["kind"], "reason": str(reason)[:100]})
+
 
 REQUEST_TIMEOUT = 20
 HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -446,15 +458,25 @@ def _fetch_feed(source: dict) -> list:
     if kind == "naver":
         return _fetch_naver(source["query"])
     if kind == "naver_web":
-        return fetch_naver_news(source["term"])
+        status = {}
+        items = fetch_naver_news(source["term"], status=status)
+        if status.get("error"):
+            _record_source_error(source, status["error"])
+        return items
     url = source["url"]
     try:
         resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
         if resp.status_code != 200:
+            _record_source_error(source, f"HTTP {resp.status_code}")
             print(f"[rss] {resp.status_code} {url}")
             return []
-        entries = feedparser.parse(resp.content).entries
+        parsed = feedparser.parse(resp.content)
+        if parsed.bozo and not parsed.entries:
+            _record_source_error(source, "RSS 파싱 실패")
+            return []
+        entries = parsed.entries
     except requests.RequestException as e:
+        _record_source_error(source, type(e).__name__)
         print(f"[rss] 조회 실패 {url}: {e}")
         return []
     items = []
@@ -476,6 +498,7 @@ def _fetch_naver(query: str) -> list:
         resp.raise_for_status()
         raw_items = resp.json().get("items", [])
     except (requests.RequestException, ValueError) as e:
+        _record_source_error({"kind": "naver"}, type(e).__name__)
         print(f"[naver] '{query}' 조회 실패: {e}")
         return []
     items = []
@@ -546,6 +569,8 @@ def collect_articles(asof: datetime | None = None) -> dict:
     alias_map = build_alias_map()
     sources = build_sources(asof)
     FALSE_POSITIVE_CASES.clear()
+    LAST_COLLECTION_REPORT.clear()
+    SOURCE_FAILURES.clear()
 
     with ThreadPoolExecutor(max_workers=16) as pool:
         feeds = list(pool.map(_fetch_feed, sources))
@@ -657,6 +682,26 @@ def collect_articles(asof: datetime | None = None) -> dict:
     print("소스별 채택 건수:", dict(kept))
     print("제외 사유:", dict(reasons))
     print(f"수집 완료: {len(valid_articles)}건 / 기사 있는 회사 {covered}/{len(by_company)} (최근 {FRESH_DAYS}일 {fresh_covered}곳)")
+    failures = list(SOURCE_FAILURES)
+    failure_groups = Counter(f["kind"] for f in failures)
+    LAST_COLLECTION_REPORT.update({
+        "sources_total": len(sources),
+        "sources_failed": len(failures),
+        "failed_by_kind": dict(failure_groups),
+        "failure_examples": list(dict.fromkeys((f["kind"], f["reason"]) for f in failures))[:10],
+        "sources_by_kind": dict(Counter(s["kind"] for s in sources)),
+        "raw_by_kind": dict(raw),
+        "kept_by_kind": dict(kept),
+        "excluded_by_reason": dict(reasons),
+        "articles_kept": len(valid_articles),
+        "companies_total": len(by_company),
+        "companies_covered": covered,
+        "companies_fresh": fresh_covered,
+    })
+    if not sum(raw.values()):
+        raise RuntimeError("뉴스 수집 원본 0건: 발행 중단 (소스 상태와 API 설정 확인)")
+    if failures:
+        print(f"[수집 경고] 소스 오류 {len(failures)}/{len(sources)}건: {dict(failure_groups)}")
     if not asof:
         _write_collect_report(raw, kept, reasons, dropped, by_company, fresh_cutoff)
     return by_company
