@@ -96,7 +96,7 @@ def _layout(*, prefix: str, title: str, main: str, script: str = "", nav: str = 
   <header class="mast">
     <div class="wrap mast-row">
       <a class="mast-name" href="{home}">소부장 주간 동향</a>
-      <nav class="mast-nav" aria-label="바로가기">{nav}<a href="{prefix}dashboard.html">올해 대시보드</a></nav>
+      <nav class="mast-nav" aria-label="바로가기">{nav}<a href="{prefix}dashboard.html">올해 대시보드</a><a href="{prefix}quality.html">수집 품질</a></nav>
     </div>
   </header>
   <main id="content" class="wrap">
