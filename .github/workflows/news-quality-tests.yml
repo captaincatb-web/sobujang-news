@@ -5,7 +5,7 @@ on:
     paths:
       - "src/**"
       - "tests/**"
-      - "scripts/probe_news_sources.py"
+      - "scripts/**"
       - ".github/workflows/news-quality-tests.yml"
   workflow_dispatch: {}
 
@@ -28,9 +28,13 @@ jobs:
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Live test of 12 additional feeds (no secrets)
         run: python -m scripts.probe_news_sources --output output/news_source_probe.json
+      - name: Live source-to-company matching and selection smoke
+        run: python -m scripts.smoke_news_pipeline
       - name: Save RSS source audit report
         uses: actions/upload-artifact@v4
         with:
           name: news-source-probe
-          path: output/news_source_probe.json
+          path: |
+            output/news_source_probe.json
+            output/source_pipeline_smoke.json
           retention-days: 7
