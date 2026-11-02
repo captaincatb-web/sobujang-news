@@ -318,7 +318,10 @@ def same_story(a: dict, b: dict, company: str) -> bool:
         return True
     if abs((a["pub_date"] - b["pub_date"]).total_seconds()) > 3 * 86400:
         return False
-    return len(key_tokens(a["title"], company) & key_tokens(b["title"], company)) >= 2
+    shared = key_tokens(a["title"], company) & key_tokens(b["title"], company)
+    # 계약 금액만 일치하는 것은 동일 사건의 근거가 아니다.
+    shared = {token for token in shared if not re.match(r"^[0-9][0-9_.,]*(?:억|조|만원|원|달러|%)?$", token)}
+    return len(shared) >= 2
 
 
 AMOUNT_TOKEN_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(조|억)")
