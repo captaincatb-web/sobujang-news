@@ -8,7 +8,7 @@ from unittest import mock
 
 from src import newsletter_collector
 from src.collection_quality import record_health
-from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS
+from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS, COMPANY_OFFICIAL_RSS
 
 
 def feed_item(url, now, title="단일판매ㆍ공급계약체결"):
@@ -54,6 +54,10 @@ class CollectorHealthTests(unittest.TestCase):
         for u in ADDITIONAL_RSS_URLS:
             self.assertIn(u, urls)
         self.assertTrue(any(s.get("kind") == "rss_global" for s in sources if s.get("url") in GLOBAL_RSS_URLS))
+        self.assertEqual(3, len(COMPANY_OFFICIAL_RSS))
+        for _name, url, company in COMPANY_OFFICIAL_RSS:
+            self.assertIn({"kind": "press", "url": url, "company": company},
+                          [s for s in sources if s.get("kind") == "press"])
 
 
 class HealthPageTests(unittest.TestCase):
