@@ -2,7 +2,7 @@ import html
 import os
 import re
 from calendar import timegm
-from collections import Counter
+from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -209,10 +209,8 @@ LEAD_RE = re.compile(r"^(?:\s*\[[^\]]*\]|\s*\([^)]*\)|\s*<[^>]*>)*\s*")
 
 def find_companies(clean_title: str, alias_map: dict) -> list:
     lower = clean_title.lower()
-    if "skc" in lower or "에스케이씨" in lower:
-        return []
-    if "와이씨켐" in lower or "ycchem" in lower or "yc chem" in lower:
-        return []
+    # 특정 회사명 때문에 다른 회사까지 모두 버리지 않는다.
+    # 짧은 별칭(와이씨 등)은 _company_spans의 최장 일치 규칙으로 구분한다.
     spans = _company_spans(lower, alias_map)
     matched = list(dict.fromkeys(co for _, _, co in sorted(spans)))
     # 제목이 'A사, …'처럼 협력사 이름으로 시작하면 그 회사(·로 이어진 회사까지)의 소식으로 본다
@@ -310,12 +308,16 @@ def key_tokens(title: str, company: str) -> set:
 
 def same_story(a: dict, b: dict, company: str) -> bool:
     """글자 유사도가 높거나, 사흘 이내 기사끼리 핵심 단어가 2개 이상 겹치면 같은 소식"""
+    # 동일 금액이라는 이유만으로 서로 다른 계약/투자 사건을 합치지 않는다.
+    amounts_a, amounts_b = _amounts(a["title"]), _amounts(b["title"])
+    if amounts_a and amounts_b and not _same_amount(a["title"], b["title"]):
+        return False
+    if abs((a["pub_date"] - b["pub_date"]).total_seconds()) > 7 * 86400:
+        return False
     if similarity(a["title"], b["title"], company) >= SIMILARITY_THRESHOLD:
         return True
     if abs((a["pub_date"] - b["pub_date"]).total_seconds()) > 3 * 86400:
         return False
-    if _same_amount(a["title"], b["title"]):
-        return True
     return len(key_tokens(a["title"], company) & key_tokens(b["title"], company)) >= 2
 
 
@@ -551,7 +553,7 @@ def collect_articles(asof: datetime | None = None) -> dict:
     raw, kept, reasons = Counter(), Counter(), Counter()
     dropped = []  # 회사명이 든 최근 기사 중 걸러진 것 (필터 점검용)
     valid_articles = []
-    seen_titles, seen_stale = set(), set()
+    seen_titles = defaultdict(set)  # 전체 기사가 아닌 회사별 제목 중복 제거
     for source, items in zip(sources, feeds):
         kind, fixed_company = source["kind"], source["company"]
         raw[kind] += len(items)
@@ -563,21 +565,11 @@ def collect_articles(asof: datetime | None = None) -> dict:
             # 포털 검색 제목에는 '- 언론사' 꼬리가 없어 그대로 쓴다
             clean_title = title.strip() if item.get("clean") else get_clean_title(title, link)
             src_name = item["source"]
-            # 같은 기사가 다른 소스/언론사로 들어와도 한 번만 (공백·기호 차이 무시, 잘린 제목은 앞부분 일치)
             norm = normalize_title(clean_title)
-            if not norm or norm in seen_titles:
+            if not norm:
                 continue
-            if item.get("truncated") and any(t.startswith(norm) for t in seen_titles):
-                continue
-            if is_stale(clean_title, link, now):
-                # 재게시된 옛 기사는 같은 제목의 최신 기사를 막지 않도록 따로 기억한다
-                if norm in seen_stale:
-                    continue
-                seen_stale.add(norm)
-                reason = "옛 기사"
-            else:
-                seen_titles.add(norm)
-                reason = _drop_reason(clean_title, link, src_name)
+            # 오래된 재게시 기사는 제목을 캐시에 등록하지 않는다.
+            reason = "옛 기사" if is_stale(clean_title, link, now) else _drop_reason(clean_title, link, src_name)
             if not reason and fixed_company and re.search(r"\[첨부(추가|정정)\]", clean_title):
                 reason = "첨부 정정 공시"  # 첨부서류만 추가·정정한 재제출 공시는 소식 가치가 없다
             if not reason and not fixed_company:
@@ -604,7 +596,11 @@ def collect_articles(asof: datetime | None = None) -> dict:
             }
 
             if fixed_company:
-                # 회사별 DART 피드: 매칭/오탐필터 우회 → 해당 회사로 직접 귀속
+                # DART는 동일 제목의 공시가 서로 다른 회사에서 발생할 수 있다.
+                titles = seen_titles[fixed_company]
+                if norm in titles:
+                    continue
+                titles.add(norm)
                 valid_articles.append(
                     {**base, "company": fixed_company, "cat3": "공시자료" if is_dart_link(link) else "기업동향"}
                 )
@@ -623,9 +619,16 @@ def collect_articles(asof: datetime | None = None) -> dict:
                 if any(c not in ENGLISH_SEARCH_TERMS for c in matched):
                     reasons["영문 국내사"] += 1
                 matched = [c for c in matched if c in ENGLISH_SEARCH_TERMS]
+            accepted = False
             for company in matched:
+                titles = seen_titles[company]
+                # 잘린 네이버 제목은 같은 기업의 더 긴 제목이 이미 있다면 생략한다.
+                if norm in titles or (item.get("truncated") and any(t.startswith(norm) for t in titles)):
+                    continue
+                titles.add(norm)
                 valid_articles.append({**base, "company": company, "cat3": "기업동향"})
-            kept[kind] += bool(matched)
+                accepted = True
+            kept[kind] += int(accepted)
 
     by_company = {c: [] for c in all_company_names()}
     for article in valid_articles:
