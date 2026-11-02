@@ -56,7 +56,14 @@ def _record_source_error(source: dict, reason: str) -> None:
 
 
 REQUEST_TIMEOUT = 20
-HEADERS = {"User-Agent": BROWSER_HEADERS["User-Agent"], "Accept": "application/rss+xml, application/xml, text/xml, */*"}
+HEADERS = {"User-Agent": "Mozilla/5.0", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
+
+
+def rss_request_headers(url: str) -> dict:
+    """사이트별 테스트를 통해 확인된 RSS User-Agent를 적용한다."""
+    if "semiwiki.com" in url:
+        return {**HEADERS, "User-Agent": BROWSER_HEADERS["User-Agent"]}
+    return HEADERS
 
 PHOTO_CAPTION_RE = re.compile(r"[\(\[〈][^\)\]〉]*사진[^\)\]〉]*[\)\]〉]\s*$")
 PHOTO_TAG_RE = re.compile(r"^\s*[\(\[〈]\s*포토\s*[\)\]〉]")
@@ -481,7 +488,7 @@ def _fetch_feed(source: dict) -> list:
         return items
     url = source["url"]
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(url, headers=rss_request_headers(url), timeout=REQUEST_TIMEOUT)
         if resp.status_code != 200:
             _record_source_error(source, f"HTTP {resp.status_code}")
             print(f"[rss] {resp.status_code} {url}")
