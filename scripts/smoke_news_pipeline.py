@@ -1,4 +1,4 @@
-"""Live but non-destructive end-to-end sample of ONLY the 12 proposed RSS sources.
+"""Live but non-destructive end-to-end sample of ONLY the currently active additional RSS sources.
 
 No API keys; no page publication. This checks whether RSS entries survive the
 actual company matcher, exclusion logic, grouping and article selection.
