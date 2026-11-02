@@ -17,9 +17,9 @@ from src.news_source_catalog import (
     GLOBAL_SEMICON_RSS,
     KOREAN_INDUSTRY_RSS,
 )
-from src.newsletter_collector import HEADERS, build_alias_map, find_companies
+from src.newsletter_collector import rss_request_headers, build_alias_map, find_companies
 
-USER_AGENT = HEADERS["User-Agent"]
+USER_AGENT = "Mozilla/5.0"
 BROWSER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 TIMEOUT = 16
 
@@ -43,7 +43,7 @@ def probe(item, *, user_agent=None):
     record = {"name": name, "url": url, "kind": kind, "company": company,
               "status": "error", "http": None, "entries": 0, "match_count": 0, "examples": []}
     try:
-        response = requests.get(url, headers={"User-Agent": user_agent or USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml, */*"}, timeout=TIMEOUT)
+        response = requests.get(url, headers=({**rss_request_headers(url), "User-Agent": user_agent} if user_agent else rss_request_headers(url)), timeout=TIMEOUT)
         record["http"] = response.status_code
         if not response.ok:
             record["reason"] = "HTTP " + str(response.status_code)
