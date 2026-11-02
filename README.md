@@ -13,11 +13,12 @@
 ## 수집 소스 확대 및 품질 모니터링
 
 기존 Google News 검색·Naver 뉴스·DART·기존 전문매체 RSS는 유지하면서
-`src/news_source_catalog.py`에 보조 RSS 12개를 추가했습니다.
+`src/news_source_catalog.py`에 보조 RSS 11개를 활성화했습니다. (Applied Materials IR 1개는 HTTP 403으로 비활성화)
 
 - 국내 5개: 한국경제, 조선비즈, 연합뉴스(경제), 파이낸셜뉴스, 아시아경제
 - 해외 반도체 전문매체 4개: Semiconductor Engineering, EE Times, SemiWiki, SemiAnalysis
-- 공식 발표/IR 3개: Applied Materials, Lam Research, 삼성 반도체 뉴스룸
+- 공식 발표/IR 활성 2개: Lam Research, 삼성 반도체 뉴스룸
+- 공식 발표/IR 보류 1개: Applied Materials (GitHub Actions에서 HTTP 403, 기존 Google News 검색으로 보완)
 
 새로운 소스는 등록 기업의 뉴스만 대상으로 하며 기존 중복/품질 필터를 통과해야 화면에 표시됩니다.
 공식 IR 피드는 확정된 회사에 직접 귀속하고, 일반 언론사 RSS는 기업명 매칭을 우선합니다.
