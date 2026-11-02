@@ -39,6 +39,13 @@ class CollectorHealthTests(unittest.TestCase):
         self.assertEqual(0, newsletter_collector.LAST_COLLECTION_REPORT["sources_failed"])
         self.assertIn("additional_sources", newsletter_collector.LAST_COLLECTION_REPORT)
 
+    def test_rss_headers_are_host_specific(self):
+        browser = newsletter_collector.rss_request_headers("https://semiwiki.com/feed/")
+        basic = newsletter_collector.rss_request_headers("https://www.hankyung.com/feed/all-news")
+        self.assertNotEqual(browser["User-Agent"], basic["User-Agent"])
+        self.assertIn("Chrome/", browser["User-Agent"])
+        self.assertEqual("Mozilla/5.0", basic["User-Agent"])
+
     def test_zero_results_stop_publication(self):
         sources = [source("코미코", "20261102900001")]
         with mock.patch.object(newsletter_collector, "build_sources", return_value=sources), \
