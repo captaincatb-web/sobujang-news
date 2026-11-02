@@ -14,7 +14,10 @@ import requests
 
 from src.history import KST
 from src.news_sources import BROWSER_HEADERS, fetch_naver_news, google_news_url
-from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS, COMPANY_OFFICIAL_RSS
+from src.news_source_catalog import (
+    ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS, COMPANY_OFFICIAL_RSS,
+    KOREAN_INDUSTRY_RSS, GLOBAL_SEMICON_RSS,
+)
 from src.newsletter_config import (
     COMPANY_ALIAS_RAW,
     DART_CORP_CODES,
@@ -33,6 +36,10 @@ from src.newsletter_config import (
     all_company_names,
 )
 
+EXTRA_SOURCE_NAMES = {
+    **{url: name for name, url in KOREAN_INDUSTRY_RSS + GLOBAL_SEMICON_RSS},
+    **{url: name for name, url, _company in COMPANY_OFFICIAL_RSS},
+}
 SOURCE_FAILURES = []
 LAST_COLLECTION_REPORT = {}
 _SOURCE_LOCK = Lock()
@@ -41,7 +48,11 @@ _SOURCE_LOCK = Lock()
 def _record_source_error(source: dict, reason: str) -> None:
     """별도 스레드의 수집 실패를 API 키/개별 URL 노출 없이 모은다."""
     with _SOURCE_LOCK:
-        SOURCE_FAILURES.append({"kind": source["kind"], "reason": str(reason)[:100]})
+        SOURCE_FAILURES.append({
+            "kind": source["kind"],
+            "source": EXTRA_SOURCE_NAMES.get(source.get("url"), source.get("company") or source["kind"]),
+            "reason": str(reason)[:100],
+        })
 
 
 REQUEST_TIMEOUT = 20
@@ -584,6 +595,7 @@ def collect_articles(asof: datetime | None = None) -> dict:
     cutoff = now - timedelta(days=MAX_AGE_DAYS)
     fresh_cutoff = now - timedelta(days=FRESH_DAYS)
     raw, kept, reasons = Counter(), Counter(), Counter()
+    accepted_by_source = Counter()
     dropped = []  # 회사명이 든 최근 기사 중 걸러진 것 (필터 점검용)
     valid_articles = []
     seen_titles = defaultdict(set)  # 전체 기사가 아닌 회사별 제목 중복 제거
@@ -641,6 +653,7 @@ def collect_articles(asof: datetime | None = None) -> dict:
                     {**base, "company": fixed_company, "cat3": "공시자료" if is_dart_link(link) else "기업동향"}
                 )
                 kept[kind] += 1
+                accepted_by_source[source.get("url", "")] += 1
                 continue
 
             names = find_companies(clean_title, alias_map)
@@ -665,6 +678,7 @@ def collect_articles(asof: datetime | None = None) -> dict:
                 valid_articles.append({**base, "company": company, "cat3": "기업동향"})
                 accepted = True
             kept[kind] += int(accepted)
+            accepted_by_source[source.get("url", "")] += int(accepted)
 
     by_company = {c: [] for c in all_company_names()}
     for article in valid_articles:
@@ -689,11 +703,23 @@ def collect_articles(asof: datetime | None = None) -> dict:
     print(f"수집 완료: {len(valid_articles)}건 / 기사 있는 회사 {covered}/{len(by_company)} (최근 {FRESH_DAYS}일 {fresh_covered}곳)")
     failures = list(SOURCE_FAILURES)
     failure_groups = Counter(f["kind"] for f in failures)
+    failed_extra = {f["source"] for f in failures}
+    extra_details = [
+        {
+            "name": EXTRA_SOURCE_NAMES[s["url"]],
+            "kind": s["kind"],
+            "raw": len(items),
+            "accepted": accepted_by_source[s["url"]],
+            "status": "error" if EXTRA_SOURCE_NAMES[s["url"]] in failed_extra else "ok",
+        }
+        for s, items in zip(sources, feeds) if s.get("url") in EXTRA_SOURCE_NAMES
+    ]
     LAST_COLLECTION_REPORT.update({
         "sources_total": len(sources),
         "sources_failed": len(failures),
         "failed_by_kind": dict(failure_groups),
-        "failure_examples": list(dict.fromkeys((f["kind"], f["reason"]) for f in failures))[:10],
+        "failure_examples": list({(f["source"], f["reason"]): f for f in failures}.values())[:10],
+        "additional_sources": extra_details,
         "sources_by_kind": dict(Counter(s["kind"] for s in sources)),
         "raw_by_kind": dict(raw),
         "kept_by_kind": dict(kept),
