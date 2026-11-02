@@ -23,6 +23,14 @@ USER_AGENT = "Mozilla/5.0 (compatible; NewsFeedAudit/1.0)"
 TIMEOUT = 16
 
 
+# Alternative hostnames are diagnostics only; they are not automatically added
+# to the public feed list without a successful parse.
+ALTERNATIVE_IR = [
+    ("Applied IR investor mirror", "https://investor.appliedmaterials.com/rss/news-releases.xml", "official", "어플라이드머티어리얼즈"),
+    ("Applied IR investors mirror", "https://investors.appliedmaterials.com/rss/news-releases.xml", "official", "어플라이드머티어리얼즈"),
+]
+
+
 def catalog():
     return [(name, url, "domestic", "") for name, url in KOREAN_INDUSTRY_RSS] + [
         (name, url, "global", "") for name, url in GLOBAL_SEMICON_RSS
@@ -70,9 +78,12 @@ def main():
     with ThreadPoolExecutor(max_workers=6) as executor:
         results = list(executor.map(probe, catalog()))
     successful = sum(r["status"] == "ok" for r in results)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        alternatives = list(executor.map(probe, ALTERNATIVE_IR))
     report = {"checked_at_utc": datetime.now(timezone.utc).isoformat(),
               "sources_total": len(results), "sources_ok": successful,
-              "sources_failed": len(results) - successful, "sources": results}
+              "sources_failed": len(results) - successful, "sources": results,
+              "alternative_ir_candidates": alternatives}
     dest = Path(args.output)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -82,6 +93,9 @@ def main():
               f"{r.get('reason','')}", flush=True)
         for example in r["examples"]:
             print(f"    MATCH: {example['company']}: {example['title']}")
+    for candidate in alternatives:
+        print(f"[ALTERNATIVE] {candidate['name']}: {candidate['status']} HTTP={candidate['http']} "
+              f"entries={candidate['entries']} {candidate.get('reason', '')}")
     print(f"RESULT: {successful}/{len(results)} functioning RSS/Atom feeds. "
           f"Report saved to {dest}", flush=True)
     # This is a diagnostic job: source errors are reported, rather than hidden;
