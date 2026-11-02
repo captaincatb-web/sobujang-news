@@ -598,9 +598,12 @@ def collect_articles(asof: datetime | None = None) -> dict:
             if fixed_company:
                 # DART는 동일 제목의 공시가 서로 다른 회사에서 발생할 수 있다.
                 titles = seen_titles[fixed_company]
-                if norm in titles:
+                # 개별 접수번호가 다른 공시는 제목이 같아도 독립된 공시다.
+                receipt = re.search(r"(?:rcpNo=|rcpno=)([0-9]{10,14})", link, re.I)
+                unique_key = ("dart:" + receipt.group(1)) if receipt else ("url:" + link if is_dart_link(link) else norm)
+                if unique_key in titles:
                     continue
-                titles.add(norm)
+                titles.add(unique_key)
                 valid_articles.append(
                     {**base, "company": fixed_company, "cat3": "공시자료" if is_dart_link(link) else "기업동향"}
                 )
