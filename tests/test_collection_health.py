@@ -37,6 +37,7 @@ class CollectorHealthTests(unittest.TestCase):
         self.assertEqual(2, len(result["코미코"]))
         self.assertEqual(1, len(result["피에스케이"]))
         self.assertEqual(0, newsletter_collector.LAST_COLLECTION_REPORT["sources_failed"])
+        self.assertIn("additional_sources", newsletter_collector.LAST_COLLECTION_REPORT)
 
     def test_zero_results_stop_publication(self):
         sources = [source("코미코", "20261102900001")]
