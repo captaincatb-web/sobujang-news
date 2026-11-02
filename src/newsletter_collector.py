@@ -13,7 +13,7 @@ import feedparser
 import requests
 
 from src.history import KST
-from src.news_sources import fetch_naver_news, google_news_url
+from src.news_sources import BROWSER_HEADERS, fetch_naver_news, google_news_url
 from src.news_source_catalog import ADDITIONAL_RSS_URLS, GLOBAL_RSS_URLS, COMPANY_OFFICIAL_RSS
 from src.newsletter_config import (
     COMPANY_ALIAS_RAW,
@@ -45,7 +45,7 @@ def _record_source_error(source: dict, reason: str) -> None:
 
 
 REQUEST_TIMEOUT = 20
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+HEADERS = {"User-Agent": BROWSER_HEADERS["User-Agent"], "Accept": "application/rss+xml, application/xml, text/xml, */*"}
 
 PHOTO_CAPTION_RE = re.compile(r"[\(\[〈][^\)\]〉]*사진[^\)\]〉]*[\)\]〉]\s*$")
 PHOTO_TAG_RE = re.compile(r"^\s*[\(\[〈]\s*포토\s*[\)\]〉]")
