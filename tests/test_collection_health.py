@@ -102,6 +102,13 @@ class HealthPageTests(unittest.TestCase):
             published = json.loads((site / "collection-health.json").read_text(encoding="utf-8"))
             self.assertEqual(322, published["collector"]["companies_total"])
 
+    def test_existing_pages_link_to_quality_dashboard(self):
+        root = Path(__file__).resolve().parents[1]
+        for filename in ("index.html", "dashboard.html"):
+            content = (root / "site" / filename).read_text(encoding="utf-8")
+            self.assertIn('href="quality.html"', content, filename)
+        self.assertIn("수집 품질", (root / "site" / "quality.html").read_text(encoding="utf-8"))
+
     def test_status_does_not_claim_ai_success_if_unreviewed(self):
         collector, ai = self.sample()
         ai.update({"analyzed": 0, "unreviewed": 12, "failed_batches": 0})
