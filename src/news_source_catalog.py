@@ -30,8 +30,12 @@ GLOBAL_RSS_URLS = frozenset(url for _name, url in GLOBAL_SEMICON_RSS)
 
 # 공식 기업/IR 발표. 공식 피드로 확인한 기업은 제목에 법인명이 없어도
 # 해당 기업의 공시·발표로 귀속한다 (언론 보도와 달리 신뢰 가능한 출처).
-COMPANY_OFFICIAL_RSS = [
+# Applied Materials 공식 RSS는 2026-11-02 GitHub Actions에서 403.
+# 확인 전에는 활성 요청 목록에서 제외한다. 기존 Google News 검색은 유지된다.
+DISABLED_OFFICIAL_RSS = [
     ("Applied Materials IR", "https://ir.appliedmaterials.com/rss/news-releases.xml", "어플라이드머티어리얼즈"),
+]
+COMPANY_OFFICIAL_RSS = [
     ("Lam Research IR", "https://investor.lamresearch.com/index.php?pagetemplate=rss&s=43", "램리서치"),
     ("Samsung Semiconductor Newsroom", "https://news.samsung.com/global/category/products/semiconductors/feed", ""),
 ]
