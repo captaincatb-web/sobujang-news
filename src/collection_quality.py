@@ -78,10 +78,27 @@ def render_page(entry: dict, previous: dict | None = None) -> str:
             f'채택 {p.get("articles_kept", 0):,}건 · 최근 기사 확인 기업 {p.get("companies_fresh", 0)}곳</p>'
         )
     failed_notes = collector.get("failure_examples", [])
-    notes = "".join(
-        f'<li>{escape(SOURCE_LABELS.get(kind, str(kind)))}: {escape(str(reason))}</li>'
-        for kind, reason in failed_notes
-    ) or "<li>기록된 수집 오류 없음</li>"
+    def failure_label(item):
+        if isinstance(item, dict):
+            return escape(str(item.get("source", item.get("kind", "unknown")))) + ": " + escape(str(item.get("reason", "")))
+        kind, reason = item
+        return escape(SOURCE_LABELS.get(kind, str(kind))) + ": " + escape(str(reason))
+
+    notes = "".join(f"<li>{failure_label(item)}</li>" for item in failed_notes) or "<li>기록된 수집 오류 없음</li>"
+    detail_rows = "".join(
+        f'<tr><td>{escape(str(s["name"]))}</td><td>{escape(str(s["kind"]))}</td>'
+        f'<td>{int(s["raw"])}</td><td>{int(s["accepted"])}</td>'
+        f'<td>{("정상" if s["status"] == "ok" else "실패")}</td></tr>'
+        for s in collector.get("additional_sources", [])
+    )
+    detail_table = (
+        '<section class="quality-section"><h2>추가 RSS 소스별 수집 현황</h2>'
+        '<p class="sub">채택은 해당 RSS에서 최초로 선택된 기업 기사 수입니다. 다른 소스와 중복되면 실제 게시 수와 다릅니다.</p>'
+        '<div style="overflow-x:auto"><table class="quality-table">'
+        '<thead><tr><th>소스</th><th>유형</th><th>원본</th><th>1차 채택</th><th>접속</th></tr></thead>'
+        f'<tbody>{detail_rows}</tbody></table></div></section>'
+        if detail_rows else ""
+    )
     main = f"""
 <section class="hero">
   <p class="kicker">DATA QUALITY · {escape(entry["generated_at"])}</p>
@@ -101,6 +118,7 @@ def render_page(entry: dict, previous: dict | None = None) -> str:
 <div style="overflow-x:auto"><table class="quality-table"><thead><tr><th>소스</th><th>요청</th><th>원본</th><th>채택</th><th>실패</th></tr></thead>
 <tbody>{_source_rows(entry)}</tbody></table></div>
 </section>
+{detail_table}
 <section class="quality-section">
 <h2>AI 처리 및 예외</h2>
 <p>후보 {eligible:,}건 · 선택 {ai.get("selected", 0):,}건 · 검토 {analyzed:,}건 · 미검토 {ai.get("unreviewed", 0):,}건 · 제외 {ai.get("dropped", 0):,}건 · 실패 배치 {ai.get("failed_batches", 0):,}회</p>
