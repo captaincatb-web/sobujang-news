@@ -1,9 +1,10 @@
 """뉴스 중복·회사명 식별·AI 예산 배분 회귀 테스트 (외부 API 호출 없음)."""
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+from unittest import mock
 
 from src.newsletter_collector import find_companies, build_alias_map, same_story
-from src.newsletter_ai import _pick_targets
+from src.newsletter_ai import _pick_targets, apply_ai_analysis
 
 
 NOW = datetime(2026, 11, 2, tzinfo=timezone.utc)
@@ -48,6 +49,36 @@ class FairAiBudgetTests(unittest.TestCase):
         selected = _pick_targets(grouped, NOW)
         self.assertEqual(240, len(selected))
         self.assertIn("company_69", [company for company, _ in selected])
+
+
+class AiReliabilityTests(unittest.TestCase):
+    def test_unrelated_removed_but_indirect_business_risk_preserved(self):
+        grouped = {
+            "미래컴퍼니": [article("미래컴퍼니, 해외 로봇수술 교육 협력")],
+            "코미코": [article("코미코, 공급망 차질로 생산 중단")],
+        }
+        classifications = {
+            0: {"relevant": True, "semiconductor_relevance": "unrelated",
+                "importance": 1, "category": "수주·협력"},
+            1: {"relevant": True, "semiconductor_relevance": "indirect",
+                "importance": 5, "category": "기타동향"},
+        }
+        with mock.patch("src.newsletter_ai._classify", return_value=classifications):
+            stats = apply_ai_analysis(grouped, NOW, client=object())
+        self.assertEqual(2, stats["analyzed"])
+        self.assertEqual(1, stats["dropped"])
+        self.assertEqual(0, len(grouped["미래컴퍼니"]))
+        self.assertEqual(1, len(grouped["코미코"]))
+
+    def test_failed_ai_batch_keeps_rules_and_tracks_unreviewed(self):
+        grouped = {"코미코": [article("코미코 신규 반도체 장비 투자")]}
+        with mock.patch("src.newsletter_ai._classify", side_effect=RuntimeError("test failure")):
+            stats = apply_ai_analysis(grouped, NOW, client=object())
+        self.assertEqual(1, stats["failed_batches"])
+        self.assertEqual(1, stats["unreviewed"])
+        self.assertEqual(1, len(grouped["코미코"]))
+
+
 
 
 if __name__ == "__main__":
