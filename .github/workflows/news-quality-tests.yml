@@ -24,4 +24,4 @@ jobs:
       - name: Compile source modules
         run: python -m compileall -q src tests
       - name: Run regression tests
-        run: python -m unittest discover -s tests -p "test_news_quality.py" -v
+        run: python -m unittest discover -s tests -p "test_*.py" -v
