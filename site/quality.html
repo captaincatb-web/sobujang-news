@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="light">
   <title>수집 품질 · 소부장 주간 동향</title>
   <link rel="icon" href="data:,">
+  <link rel="preload" href="vendor/pretendard/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="news.css">
 </head>
 <body>
@@ -13,23 +14,53 @@
   <header class="mast">
     <div class="wrap mast-row">
       <a class="mast-name" href="./">소부장 주간 동향</a>
-      <nav class="mast-nav" aria-label="바로가기">
-        <a href="index.html">전체 주차</a>
-        <a href="dashboard.html">올해 대시보드</a>
-        <a href="quality.html" aria-current="page">수집 품질</a>
-      </nav>
+      <nav class="mast-nav" aria-label="바로가기"><a href="index.html">전체 주차</a><a href="dashboard.html">올해 대시보드</a><a href="quality.html">수집 품질</a></nav>
     </div>
   </header>
   <main id="content" class="wrap">
-    <section class="hero">
-      <p class="kicker">DATA QUALITY</p>
-      <h1>뉴스 수집 품질</h1>
-      <p class="sub">수집 품질 현황은 다음 정상 뉴스레터 생성 시 자동 갱신됩니다.</p>
-      <p class="sub">아직 실행 집계가 없어 성공률·AI 검증률을 표시하지 않습니다.</p>
-      <p class="sub">신규 RSS 11개에 대한 실수집 검증은 완료되었으며, 주간 실행 이후 소스별 수집 결과가 표시됩니다.</p>
-    </section>
-    <p><a class="go" href="index.html">주간 동향으로 돌아가기 →</a></p>
+    
+<section class="hero">
+  <p class="kicker">DATA QUALITY · 2026-11-05T10:00:18+09:00</p>
+  <h1>뉴스 수집 품질</h1>
+  <p class="sub">일부 소스 실패 · 대상 322곳 · AI 미사용·미검토</p>
+  
+</section>
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:18px 0">
+  <div class="quality-card"><small>수집 요청 성공률</small><strong>99.9%</strong><span>정상 767 / 전체 768</span></div>
+  <div class="quality-card"><small>수집 및 채택</small><strong>1,627건</strong><span>중복·필터 적용 후 회사별 기사</span></div>
+  <div class="quality-card"><small>최근 7일 기사 확인 기업</small><strong>77곳</strong><span>전체 322곳</span></div>
+  <div class="quality-card"><small>AI 검토율</small><strong>0.0%</strong><span>검토 0 / 후보 289</span></div>
+</section>
+<section class="quality-section">
+<h2>수집 소스별 결과</h2>
+<p class="sub">수집 요청 수·원본 기사 수·중복/필터 후 채택 수·실패 요청 수. 채택 건수는 중복 귀속 전후 기준에 따라 합계와 다를 수 있습니다.</p>
+<div style="overflow-x:auto"><table class="quality-table"><thead><tr><th>소스</th><th>요청</th><th>원본</th><th>채택</th><th>실패</th></tr></thead>
+<tbody><tr><td>DART 공시</td><td>64</td><td>23</td><td>23</td><td>0</td></tr><tr><td>기업 공식 발표·IR RSS</td><td>2</td><td>55</td><td>1</td><td>0</td></tr><tr><td>국내 언론사 RSS</td><td>15</td><td>926</td><td>5</td><td>1</td></tr><tr><td>해외 반도체 전문매체 RSS</td><td>4</td><td>45</td><td>1</td><td>0</td></tr><tr><td>Google News</td><td>337</td><td>4155</td><td>1316</td><td>0</td></tr><tr><td>Google News 영문</td><td>9</td><td>460</td><td>95</td><td>0</td></tr><tr><td>Naver 웹 검색</td><td>337</td><td>2946</td><td>176</td><td>0</td></tr></tbody></table></div>
+</section>
+<section class="quality-section"><h2>추가 RSS 소스별 수집 현황</h2><p class="sub">채택은 해당 RSS에서 최초로 선택된 기업 기사 수입니다. 다른 소스와 중복되면 실제 게시 수와 다릅니다.</p><div style="overflow-x:auto"><table class="quality-table"><thead><tr><th>소스</th><th>유형</th><th>원본</th><th>1차 채택</th><th>접속</th></tr></thead><tbody><tr><td>Lam Research IR</td><td>press</td><td>5</td><td>1</td><td>정상</td></tr><tr><td>Samsung Semiconductor Newsroom</td><td>press</td><td>50</td><td>0</td><td>정상</td></tr><tr><td>한국경제</td><td>rss</td><td>50</td><td>0</td><td>정상</td></tr><tr><td>조선비즈</td><td>rss</td><td>100</td><td>0</td><td>정상</td></tr><tr><td>연합뉴스 경제</td><td>rss</td><td>120</td><td>0</td><td>정상</td></tr><tr><td>파이낸셜뉴스</td><td>rss</td><td>146</td><td>0</td><td>정상</td></tr><tr><td>아시아경제</td><td>rss</td><td>100</td><td>0</td><td>정상</td></tr><tr><td>Semiconductor Engineering</td><td>rss_global</td><td>10</td><td>0</td><td>정상</td></tr><tr><td>EE Times</td><td>rss_global</td><td>10</td><td>0</td><td>정상</td></tr><tr><td>SemiWiki</td><td>rss_global</td><td>5</td><td>0</td><td>정상</td></tr><tr><td>SemiAnalysis</td><td>rss_global</td><td>20</td><td>1</td><td>정상</td></tr></tbody></table></div></section>
+<section class="quality-section">
+<h2>AI 처리 및 예외</h2>
+<p>후보 289건 · 선택 0건 · 검토 0건 · 미검토 289건 · 제외 0건 · 실패 배치 0회</p>
+<h3>실패 사유 예시 (종류별, 최대 10개)</h3><ul><li>rss: HTTP 403</li></ul>
+</section>
+<p class="sub">기준: 실제 GitHub Actions 실행 결과 · 기사 적합률은 수동 정답 검수 없이는 산출하지 않음 · 데이터 갱신은 다음 주간 실행 시 반영</p>
+<style>
+.quality-card{border:1px solid #e5e8eb;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.quality-card small{color:#6b7684;font-size:12px}.quality-card strong{font-size:25px;font-weight:750}.quality-card span{color:#6b7684;font-size:11px}
+.quality-section{margin-top:26px}.quality-section h2{font-size:17px;margin-bottom:7px}
+.quality-section h3{font-size:13px}.quality-section p,.quality-section li{font-size:12px;line-height:1.7}
+.quality-table{width:100%;border-collapse:collapse;font-size:12px;text-align:right}
+.quality-table th,.quality-table td{padding:10px;border-bottom:1px solid #e5e8eb}
+.quality-table th:first-child,.quality-table td:first-child{text-align:left}
+</style>
+
   </main>
-  <footer class="foot"><div class="wrap"><p>뉴스 제목과 원문 링크를 모아 보여 주는 자동 수집 페이지입니다.</p></div></footer>
+  <footer class="foot">
+    <div class="wrap">
+      <p>기사 제목과 원문 링크만 모아 보여 주는 자동 수집 페이지입니다. 기사의 저작권은 각 언론사에 있습니다.</p>
+      <p>매주 목요일 갱신 · <a href="#content">↑ 맨 위로</a></p>
+    </div>
+  </footer>
+  
 </body>
 </html>

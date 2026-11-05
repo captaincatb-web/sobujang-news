@@ -1140,5 +1140,33 @@
    }
   ],
   "total": 73
+ },
+ "2026-11-05": {
+  "extra_companies": 41,
+  "extra_total": 249,
+  "fresh_companies": 40,
+  "fresh_dart": 23,
+  "fresh_news": 127,
+  "highlights": [
+   {
+    "cat": "투자·증설",
+    "company": "심텍",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=64834",
+    "title": "심텍, 청주에 1054억원 추가 투자…생산·물류시설 확충"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "원익IPS",
+    "link": "https://www.kmkj.kr/news/articleView.html?idxno=142714",
+    "title": "원익IPS, 반도체 증착장비 ‘GEMINI’ 10주년 누적 출하 800대 육박…글로벌 시장 확대"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "한솔아이원스",
+    "link": "http://www.mbn.co.kr/pages/vod/programContents.php?progCode=683&menuCode=4385&bcastSeqNo=1432099",
+    "title": "충청북도, 한솔아이원스와 1560억 원 규모 투자협약"
+   }
+  ],
+  "total": 73
  }
 }
