@@ -1168,5 +1168,33 @@
    }
   ],
   "total": 73
+ },
+ "2026-11-12": {
+  "extra_companies": 54,
+  "extra_total": 249,
+  "fresh_companies": 38,
+  "fresh_dart": 24,
+  "fresh_news": 109,
+  "highlights": [
+   {
+    "cat": "수주·협력",
+    "company": "케이씨텍",
+    "link": "https://n.news.naver.com/article/016/0002722194?sid=101",
+    "title": "케이씨텍, 200억 규모 자사주 취득 신탁계약 체결 결정"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "삼성물산",
+    "link": "https://www.newsian.co.kr/news/articleView.html?idxno=101130",
+    "title": "삼성물산 패션, 협력사 79곳과 내년 공정거래 협약"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "삼성전기",
+    "link": "http://www.paxetv.com/news/articleView.html?idxno=286685",
+    "title": "삼성전기, 동반성장지수 3년 연속 최우수…\"협력사 동반성장 앞장\""
+   }
+  ],
+  "total": 73
  }
 }

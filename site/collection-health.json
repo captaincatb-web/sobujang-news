@@ -1,6 +1,6 @@
 {
-  "week": "2026-11-05",
-  "generated_at": "2026-11-05T10:00:18+09:00",
+  "week": "2026-11-12",
+  "generated_at": "2026-11-12T10:58:58+09:00",
   "collector": {
     "sources_total": 768,
     "sources_failed": 1,
@@ -19,7 +19,7 @@
         "name": "Lam Research IR",
         "kind": "press",
         "raw": 5,
-        "accepted": 1,
+        "accepted": 2,
         "status": "ok"
       },
       {
@@ -53,7 +53,7 @@
       {
         "name": "파이낸셜뉴스",
         "kind": "rss",
-        "raw": 146,
+        "raw": 251,
         "accepted": 0,
         "status": "ok"
       },
@@ -103,45 +103,44 @@
       "naver_web": 337
     },
     "raw_by_kind": {
-      "dart": 23,
+      "dart": 24,
       "press": 55,
-      "rss": 926,
+      "rss": 1030,
       "rss_global": 45,
-      "google": 4155,
-      "google_en": 460,
-      "naver_web": 2946
+      "google": 4241,
+      "google_en": 494,
+      "naver_web": 3270
     },
     "kept_by_kind": {
-      "dart": 23,
-      "press": 1,
-      "rss": 5,
+      "dart": 24,
+      "press": 2,
+      "rss": 4,
       "rss_global": 1,
-      "google": 1316,
-      "google_en": 95,
-      "naver_web": 176
+      "google": 1303,
+      "google_en": 89,
+      "naver_web": 210
     },
     "excluded_by_reason": {
-      "스팸·채용": 93,
-      "주가·증시": 2023,
-      "영문 주가": 317,
-      "옛 기사": 13,
-      "사진 캡션": 44,
-      "블로그·유료": 47,
-      "동명이인·오탐": 93,
-      "차단 매체": 48,
-      "영문 국내사": 1
+      "주가·증시": 2074,
+      "스팸·채용": 66,
+      "영문 주가": 341,
+      "사진 캡션": 42,
+      "옛 기사": 16,
+      "블로그·유료": 52,
+      "차단 매체": 46,
+      "동명이인·오탐": 98
     },
-    "articles_kept": 1627,
+    "articles_kept": 1646,
     "companies_total": 322,
-    "companies_covered": 122,
-    "companies_fresh": 77
+    "companies_covered": 125,
+    "companies_fresh": 83
   },
   "ai": {
-    "eligible": 289,
+    "eligible": 269,
     "selected": 0,
     "analyzed": 0,
     "dropped": 0,
-    "unreviewed": 289,
+    "unreviewed": 269,
     "failed_batches": 0
   }
 }
