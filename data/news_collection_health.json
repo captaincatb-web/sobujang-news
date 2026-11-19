@@ -291,5 +291,158 @@
     },
     "generated_at": "2026-11-12T10:58:58+09:00",
     "week": "2026-11-12"
+  },
+  "2026-11-19": {
+    "ai": {
+      "analyzed": 0,
+      "dropped": 0,
+      "eligible": 272,
+      "failed_batches": 0,
+      "selected": 0,
+      "unreviewed": 272
+    },
+    "collector": {
+      "additional_sources": [
+        {
+          "accepted": 4,
+          "kind": "press",
+          "name": "Lam Research IR",
+          "raw": 5,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "press",
+          "name": "Samsung Semiconductor Newsroom",
+          "raw": 50,
+          "status": "ok"
+        },
+        {
+          "accepted": 1,
+          "kind": "rss",
+          "name": "한국경제",
+          "raw": 50,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss",
+          "name": "조선비즈",
+          "raw": 100,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss",
+          "name": "연합뉴스 경제",
+          "raw": 120,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss",
+          "name": "파이낸셜뉴스",
+          "raw": 227,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss",
+          "name": "아시아경제",
+          "raw": 100,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss_global",
+          "name": "Semiconductor Engineering",
+          "raw": 10,
+          "status": "ok"
+        },
+        {
+          "accepted": 1,
+          "kind": "rss_global",
+          "name": "EE Times",
+          "raw": 10,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss_global",
+          "name": "SemiWiki",
+          "raw": 5,
+          "status": "ok"
+        },
+        {
+          "accepted": 0,
+          "kind": "rss_global",
+          "name": "SemiAnalysis",
+          "raw": 20,
+          "status": "ok"
+        }
+      ],
+      "articles_kept": 1717,
+      "companies_covered": 132,
+      "companies_fresh": 102,
+      "companies_total": 322,
+      "excluded_by_reason": {
+        "동명이인·오탐": 74,
+        "블로그·유료": 58,
+        "사진 캡션": 41,
+        "스팸·채용": 73,
+        "영문 국내사": 1,
+        "영문 주가": 270,
+        "옛 기사": 19,
+        "주가·증시": 1812,
+        "차단 매체": 37
+      },
+      "failed_by_kind": {
+        "naver_web": 221,
+        "rss": 1
+      },
+      "failure_examples": [
+        {
+          "kind": "rss",
+          "reason": "HTTP 403",
+          "source": "rss"
+        },
+        {
+          "kind": "naver_web",
+          "reason": "네이버 검색 주소 전체 차단(403/429)",
+          "source": "naver_web"
+        }
+      ],
+      "kept_by_kind": {
+        "dart": 47,
+        "google": 1471,
+        "google_en": 68,
+        "naver_web": 102,
+        "press": 4,
+        "rss": 9,
+        "rss_global": 1
+      },
+      "raw_by_kind": {
+        "dart": 47,
+        "google": 4221,
+        "google_en": 400,
+        "naver_web": 1506,
+        "press": 55,
+        "rss": 1007,
+        "rss_global": 45
+      },
+      "sources_by_kind": {
+        "dart": 64,
+        "google": 337,
+        "google_en": 9,
+        "naver_web": 337,
+        "press": 2,
+        "rss": 15,
+        "rss_global": 4
+      },
+      "sources_failed": 222,
+      "sources_total": 768
+    },
+    "generated_at": "2026-11-19T10:58:17+09:00",
+    "week": "2026-11-19"
   }
 }

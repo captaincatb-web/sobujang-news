@@ -1,17 +1,23 @@
 {
-  "week": "2026-11-12",
-  "generated_at": "2026-11-12T10:58:58+09:00",
+  "week": "2026-11-19",
+  "generated_at": "2026-11-19T10:58:17+09:00",
   "collector": {
     "sources_total": 768,
-    "sources_failed": 1,
+    "sources_failed": 222,
     "failed_by_kind": {
-      "rss": 1
+      "rss": 1,
+      "naver_web": 221
     },
     "failure_examples": [
       {
         "kind": "rss",
         "source": "rss",
         "reason": "HTTP 403"
+      },
+      {
+        "kind": "naver_web",
+        "source": "naver_web",
+        "reason": "네이버 검색 주소 전체 차단(403/429)"
       }
     ],
     "additional_sources": [
@@ -19,7 +25,7 @@
         "name": "Lam Research IR",
         "kind": "press",
         "raw": 5,
-        "accepted": 2,
+        "accepted": 4,
         "status": "ok"
       },
       {
@@ -33,7 +39,7 @@
         "name": "한국경제",
         "kind": "rss",
         "raw": 50,
-        "accepted": 0,
+        "accepted": 1,
         "status": "ok"
       },
       {
@@ -53,7 +59,7 @@
       {
         "name": "파이낸셜뉴스",
         "kind": "rss",
-        "raw": 251,
+        "raw": 227,
         "accepted": 0,
         "status": "ok"
       },
@@ -75,7 +81,7 @@
         "name": "EE Times",
         "kind": "rss_global",
         "raw": 10,
-        "accepted": 0,
+        "accepted": 1,
         "status": "ok"
       },
       {
@@ -89,7 +95,7 @@
         "name": "SemiAnalysis",
         "kind": "rss_global",
         "raw": 20,
-        "accepted": 1,
+        "accepted": 0,
         "status": "ok"
       }
     ],
@@ -103,44 +109,45 @@
       "naver_web": 337
     },
     "raw_by_kind": {
-      "dart": 24,
+      "dart": 47,
       "press": 55,
-      "rss": 1030,
+      "rss": 1007,
       "rss_global": 45,
-      "google": 4241,
-      "google_en": 494,
-      "naver_web": 3270
+      "google": 4221,
+      "google_en": 400,
+      "naver_web": 1506
     },
     "kept_by_kind": {
-      "dart": 24,
-      "press": 2,
-      "rss": 4,
+      "dart": 47,
+      "press": 4,
+      "rss": 9,
       "rss_global": 1,
-      "google": 1303,
-      "google_en": 89,
-      "naver_web": 210
+      "google": 1471,
+      "google_en": 68,
+      "naver_web": 102
     },
     "excluded_by_reason": {
-      "주가·증시": 2074,
-      "스팸·채용": 66,
-      "영문 주가": 341,
-      "사진 캡션": 42,
-      "옛 기사": 16,
-      "블로그·유료": 52,
-      "차단 매체": 46,
-      "동명이인·오탐": 98
+      "주가·증시": 1812,
+      "스팸·채용": 73,
+      "동명이인·오탐": 74,
+      "옛 기사": 19,
+      "사진 캡션": 41,
+      "영문 주가": 270,
+      "블로그·유료": 58,
+      "차단 매체": 37,
+      "영문 국내사": 1
     },
-    "articles_kept": 1646,
+    "articles_kept": 1717,
     "companies_total": 322,
-    "companies_covered": 125,
-    "companies_fresh": 83
+    "companies_covered": 132,
+    "companies_fresh": 102
   },
   "ai": {
-    "eligible": 269,
+    "eligible": 272,
     "selected": 0,
     "analyzed": 0,
     "dropped": 0,
-    "unreviewed": 269,
+    "unreviewed": 272,
     "failed_batches": 0
   }
 }

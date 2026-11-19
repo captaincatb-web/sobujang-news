@@ -1196,5 +1196,33 @@
    }
   ],
   "total": 73
+ },
+ "2026-11-19": {
+  "extra_companies": 49,
+  "extra_total": 249,
+  "fresh_companies": 49,
+  "fresh_dart": 45,
+  "fresh_news": 121,
+  "highlights": [
+   {
+    "cat": "투자·증설",
+    "company": "아데카코리아",
+    "link": "http://m.jlmaeil.com/view.php?idx=307507",
+    "title": "아데카코리아, 완주에 900억 추가 투자"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "삼성전기",
+    "link": "https://www.thelec.kr/news/articleView.html?idxno=65583",
+    "title": "삼성전기, 엔비디아와 MLCC 협력"
+   },
+   {
+    "cat": "수주·협력",
+    "company": "삼성전기",
+    "link": "https://www.hankyung.com/article/202611185201i",
+    "title": "삼성전기 32% 빠질 때 43% 뛴 코리아써키트…수주 두 배에 증설 효과까지"
+   }
+  ],
+  "total": 73
  }
 }
